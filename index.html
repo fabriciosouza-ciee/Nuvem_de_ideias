@@ -55,11 +55,10 @@
         0 0 20px rgba(0, 240, 255, 0.15);
       padding: 24px 20px;
       width: 100%;
-      max-width: 440px;
+      max-width: 460px;
       position: relative;
     }
 
-    /* Level Badge Inspired by Notebook Cover */
     .header-badge-row {
       display: flex;
       justify-content: space-between;
@@ -73,9 +72,10 @@
       background-color: var(--pixel-black);
       color: var(--accent-yellow);
       border: 2px solid var(--accent-cyan);
-      padding: 4px 8px;
+      padding: 5px 8px;
       border-radius: 4px;
       box-shadow: 2px 2px 0px #000;
+      text-transform: uppercase;
     }
 
     h1.game-title {
@@ -110,7 +110,16 @@
       margin-bottom: 8px;
       color: var(--text-violet);
       text-shadow: 1px 1px 0px var(--pixel-black);
-      line-height: 1.3;
+      line-height: 1.4;
+    }
+
+    /* Highlighted label for 'Sua palavra ou ideia' */
+    label.label-destaque {
+      font-size: 11px;
+      color: var(--accent-yellow);
+      text-shadow: 2px 2px 0px var(--pixel-black);
+      margin-top: 10px;
+      margin-bottom: 10px;
     }
 
     input, select {
@@ -128,6 +137,15 @@
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
+    /* Larger font for the main input */
+    #resposta {
+      font-size: 26px;
+      padding: 12px 14px;
+      border: 3px solid var(--accent-cyan);
+      background-color: #ffffff;
+      box-shadow: inset 3px 3px 0px #cfd8dc, 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
     input:focus, select:focus {
       border-color: var(--accent-cyan);
       box-shadow: 0 0 0 3px var(--accent-cyan), inset 2px 2px 0px #aaa;
@@ -143,11 +161,17 @@
       padding-right: 32px;
     }
 
+    select:disabled {
+      background-color: #e0e0e0;
+      color: #777777;
+      cursor: not-allowed;
+    }
+
     .btn-play {
       font-family: 'Press Start 2P', cursive;
       font-size: 11px;
       width: 100%;
-      margin-top: 10px;
+      margin-top: 14px;
       padding: 16px 12px;
       background-color: var(--arcade-green);
       color: #ffffff;
@@ -184,7 +208,6 @@
       opacity: 0.8;
     }
 
-    /* Pixelated Status Notification */
     .status-msg {
       font-family: 'Press Start 2P', cursive;
       font-size: 9px;
@@ -236,7 +259,7 @@
   <div class="game-card">
     
     <div class="header-badge-row">
-      <span class="badge-pixel">LVL 01</span>
+      <span class="badge-pixel">ÚLTIMO NÍVEL</span>
       <span class="badge-pixel">CIEE PLAY</span>
     </div>
 
@@ -244,25 +267,34 @@
     <div class="play-subtitle">► DÊ UM PLAY NA SUA JORNADA! ◄</div>
 
     <form id="formIdeia">
+      <!-- Cidade Selection -->
       <div class="form-group">
-        <label for="turma">SELECIONE SUA TURMA:</label>
-        <select id="turma" required>
-          <option value="">-- ESCOLHA A TURMA --</option>
-          <option value="Turma A">TURMA A</option>
-          <option value="Turma B">TURMA B</option>
-          <option value="Turma C">TURMA C</option>
-          <option value="Turma D">TURMA D</option>
-          <option value="Turma E">TURMA E</option>
+        <label for="cidade">SELECIONE SUA CIDADE:</label>
+        <select id="cidade" required>
+          <option value="">-- ESCOLHA A CIDADE --</option>
+          <option value="Braço do Norte">BRAÇO DO NORTE</option>
+          <option value="Imbituba">IMBITUBA</option>
+          <option value="Tubarão">TUBARÃO</option>
         </select>
       </div>
 
+      <!-- Turma Selection (Dynamic based on Cidade) -->
+      <div class="form-group">
+        <label for="turma">SELECIONE SUA TURMA:</label>
+        <select id="turma" required disabled>
+          <option value="">-- SELECIONE A CIDADE PRIMEIRO --</option>
+        </select>
+      </div>
+
+      <!-- Nome Input -->
       <div class="form-group">
         <label for="nome">SEU NOME (OPCIONAL):</label>
         <input type="text" id="nome" placeholder="ANÔNIMO" maxlength="40">
       </div>
 
+      <!-- Resposta Input (Larger Font Label) -->
       <div class="form-group">
-        <label for="resposta">SUA PALAVRA OU IDEIA:</label>
+        <label for="resposta" class="label-destaque">★ SUA PALAVRA OU IDEIA ★</label>
         <input type="text" id="resposta" placeholder="EX: INOVAÇÃO" required maxlength="30" autocomplete="off">
       </div>
 
@@ -284,7 +316,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Credenciais atualizadas do Firebase para ciee-tubarao
+    // Firebase Config for ciee-tubarao
     const firebaseConfig = {
       apiKey: "AIzaSyBPyd0QyTdfmXjWek1wy2rxSYw7xHiT_to",
       authDomain: "ciee-tubarao.firebaseapp.com",
@@ -299,27 +331,90 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // Mapeamento de Turmas por Cidade
+    const turmasPorCidade = {
+      "Braço do Norte": [
+        "Terça matutino",
+        "Terça vespertino"
+      ],
+      "Imbituba": [
+        "Segunda vespertino",
+        "Quarta matutino",
+        "Quarta vespertino",
+        "Quinta matutino",
+        "Quinta vespertino",
+        "Sexta matutino",
+        "Sexta vespertino"
+      ],
+      "Tubarão": [
+        "Segunda vesp (Sofia)",
+        "Segunda vesp (Fabrício)",
+        "Terça matutino",
+        "Terça vesp (Fabrício)",
+        "Terça vesp (João)",
+        "Quarta matutino",
+        "Quarta vespertino",
+        "Quinta matutino",
+        "Quinta vespertino",
+        "Sexta matutino",
+        "Sexta vespertino"
+      ]
+    };
+
+    const cidadeSelect = document.getElementById('cidade');
+    const turmaSelect = document.getElementById('turma');
     const form = document.getElementById('formIdeia');
     const statusDiv = document.getElementById('status');
     const btnSubmit = document.getElementById('btnSubmit');
 
+    // Lógica para atualizar o menu de Turmas ao escolher a Cidade
+    cidadeSelect.addEventListener('change', () => {
+      const cidadeSelecionada = cidadeSelect.value;
+      
+      // Limpa opções anteriores
+      turmaSelect.innerHTML = '';
+
+      if (cidadeSelecionada && turmasPorCidade[cidadeSelecionada]) {
+        turmaSelect.disabled = false;
+        
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '-- ESCOLHA A TURMA --';
+        turmaSelect.appendChild(defaultOption);
+
+        turmasPorCidade[cidadeSelecionada].forEach((turma) => {
+          const opt = document.createElement('option');
+          opt.value = turma;
+          opt.textContent = turma.toUpperCase();
+          turmaSelect.appendChild(opt);
+        });
+      } else {
+        turmaSelect.disabled = true;
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '-- SELECIONE A CIDADE PRIMEIRO --';
+        turmaSelect.appendChild(defaultOption);
+      }
+    });
+
+    // Submissão do formulário
     form.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      const turma = document.getElementById('turma').value;
+      const cidade = cidadeSelect.value;
+      const turma = turmaSelect.value;
       const nome = document.getElementById('nome').value.trim() || 'Anônimo';
       const resposta = document.getElementById('resposta').value.trim().toLowerCase();
 
-      if (!resposta) return;
+      if (!cidade || !turma || !resposta) return;
 
-      // Estado de carregamento no botão
       btnSubmit.disabled = true;
       btnSubmit.innerHTML = '<span>ENVIANDO...</span><span>⌛</span>';
       statusDiv.className = 'status-msg';
       statusDiv.innerText = '';
 
-      // Envio para o nó "respostas" do Firebase Realtime Database
       push(ref(db, 'respostas'), {
+        cidade: cidade,
         turma: turma,
         nome: nome,
         palavra: resposta,
