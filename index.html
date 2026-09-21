@@ -1,496 +1,643 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Nuvem de Ideias - CIEE Play</title>
-
-  <!-- Google Fonts: Pixel Art Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-
-  <style>
-    * {
-      box-sizing: border-box;
-      image-rendering: pixelated;
-      -webkit-font-smoothing: none;
-    }
-
-    :root {
-      --bg-gradient-start: #1a0033;
-      --bg-gradient-end: #2a0845;
-      --card-bg: #1f1640;
-      --accent-cyan: #00ffff;
-      --accent-yellow: #ffee00;
-      --arcade-green: #00e676;
-      --arcade-green-hover: #00b0ff;
-      --arcade-green-dark: #00813c;
-      --pixel-black: #0d081f;
-      --text-violet: #d4c7f5;
-    }
-
-    body {
-      font-family: 'VT323', monospace;
-      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-      background-image: 
-        radial-gradient(rgba(100, 50, 180, 0.35) 20%, transparent 20%),
-        radial-gradient(rgba(100, 50, 180, 0.35) 20%, transparent 20%);
-      background-size: 16px 16px;
-      background-position: 0 0, 8px 8px;
-      color: #ffffff;
-      margin: 0;
-      padding: 16px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      width: 100%;
-    }
-
-    /* Main arcade container card */
-    .game-card {
-      background-color: var(--card-bg);
-      border: 4px solid var(--pixel-black);
-      border-radius: 12px;
-      box-shadow: 
-        inset 0 0 0 2px #3c2a75,
-        0 10px 0px var(--pixel-black),
-        0 0 30px rgba(0, 255, 255, 0.25);
-      padding: 24px 20px;
-      width: 100%;
-      max-width: 480px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .header-badge-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .badge-pixel {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 9px;
-      background-color: var(--pixel-black);
-      color: var(--accent-yellow);
-      border: 2px solid var(--accent-cyan);
-      padding: 6px 10px;
-      border-radius: 4px;
-      box-shadow: 2px 2px 0px #000;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    h1.game-title {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 18px;
-      color: var(--accent-cyan);
-      text-shadow: 3px 3px 0px var(--pixel-black), -1px -1px 0px #ffffff;
-      text-align: center;
-      margin: 0 0 8px 0;
-      line-height: 1.4;
-      letter-spacing: 0.5px;
-    }
-
-    .play-subtitle {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 8px;
-      color: var(--accent-yellow);
-      text-align: center;
-      margin-bottom: 24px;
-      text-shadow: 1px 1px 0px #000;
-      line-height: 1.5;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 9px;
-      display: block;
-      margin-bottom: 8px;
-      color: var(--text-violet);
-      text-shadow: 1px 1px 0px var(--pixel-black);
-      line-height: 1.4;
-    }
-
-    /* Highlighted prompt label for word entry */
-    label.label-destaque {
-      font-size: 11px;
-      color: var(--accent-yellow);
-      text-shadow: 2px 2px 0px var(--pixel-black);
-      margin-top: 14px;
-      margin-bottom: 10px;
-      text-align: center;
-    }
-
-    input, select {
-      font-family: 'VT323', monospace;
-      font-size: 22px;
-      letter-spacing: 1px;
-      width: 100%;
-      padding: 12px 14px;
-      background-color: #ffffff;
-      color: #0d081f;
-      border: 3px solid var(--pixel-black);
-      border-radius: 6px;
-      box-shadow: inset 3px 3px 0px #b8b8b8;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    /* Enlarged input box for main word submission */
-    #resposta {
-      font-size: 26px;
-      padding: 14px 16px;
-      text-align: center;
-      text-transform: uppercase;
-      border: 3px solid var(--accent-cyan);
-      background-color: #ffffff;
-      box-shadow: inset 3px 3px 0px #cfd8dc, 0 0 12px rgba(0, 255, 255, 0.35);
-    }
-
-    input:focus, select:focus {
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 0 3px var(--accent-cyan), inset 2px 2px 0px #aaa;
-    }
-
-    select {
-      cursor: pointer;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%230d081f" d="M0 2h12v2H0zM2 4h8v2H2zM4 6h4v2H4zM6 8h0v2H6z"/></svg>');
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      appearance: none;
-      -webkit-appearance: none;
-      padding-right: 36px;
-    }
-
-    select:disabled {
-      background-color: #d1d5db;
-      color: #6b7280;
-      cursor: not-allowed;
-    }
-
-    .btn-play {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 12px;
-      width: 100%;
-      margin-top: 18px;
-      padding: 16px 14px;
-      background-color: var(--arcade-green);
-      color: #0d081f;
-      border: 3px solid var(--pixel-black);
-      border-radius: 8px;
-      box-shadow: 0 6px 0px var(--arcade-green-dark), 0 9px 0px var(--pixel-black);
-      cursor: pointer;
-      font-weight: bold;
-      text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.4);
-      position: relative;
-      top: 0;
-      transition: all 0.1s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .btn-play:hover {
-      background-color: var(--arcade-green-hover);
-      box-shadow: 0 6px 0px #0277bd, 0 9px 0px var(--pixel-black);
-      color: #ffffff;
-      text-shadow: 1px 1px 0px var(--pixel-black);
-    }
-
-    .btn-play:active {
-      top: 6px;
-      box-shadow: 0 0px 0px var(--arcade-green-dark), 0 3px 0px var(--pixel-black);
-    }
-
-    .btn-play:disabled {
-      background-color: #7f8c8d;
-      box-shadow: 0 4px 0px #34495e, 0 7px 0px var(--pixel-black);
-      cursor: not-allowed;
-      opacity: 0.8;
-      color: #ffffff;
-      text-shadow: none;
-    }
-
-    .status-msg {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 9px;
-      text-align: center;
-      margin-top: 20px;
-      min-height: 28px;
-      line-height: 1.6;
-      padding: 8px;
-      border-radius: 6px;
-      transition: all 0.3s ease;
-    }
-
-    .status-msg.success {
-      color: #00ff66;
-      text-shadow: 1px 1px 0px #000;
-      background-color: rgba(0, 255, 102, 0.12);
-      border: 2px dashed #00ff66;
-    }
-
-    .status-msg.error {
-      color: #ff3838;
-      text-shadow: 1px 1px 0px #000;
-      background-color: rgba(255, 56, 56, 0.12);
-      border: 2px dashed #ff3838;
-    }
-
-    .ciee-footer {
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 2px dashed #422f7a;
-      text-align: center;
-      font-family: 'Press Start 2P', cursive;
-      font-size: 8px;
-      color: #9d87d4;
-      line-height: 1.8;
-    }
-
-    .ciee-footer strong {
-      color: var(--accent-cyan);
-    }
-
-    .social-links {
-      color: var(--accent-yellow);
-      margin-top: 6px;
-    }
-
-    /* Mobile Responsiveness Adjustments */
-    @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-
-      .game-card {
-        padding: 18px 14px;
-      }
-
-      h1.game-title {
-        font-size: 15px;
-      }
-
-      .play-subtitle {
-        font-size: 7px;
-        margin-bottom: 18px;
-      }
-
-      label {
-        font-size: 8px;
-      }
-
-      label.label-destaque {
-        font-size: 10px;
-      }
-
-      input, select {
-        font-size: 19px;
-        padding: 10px 12px;
-      }
-
-      #resposta {
-        font-size: 22px;
-        padding: 12px;
-      }
-
-      .btn-play {
-        font-size: 10px;
-        padding: 14px 10px;
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <div class="game-card">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuvem de Ideias - CIEE Play</title>
     
-    <div class="header-badge-row">
-      <span class="badge-pixel">ÚLTIMO NÍVEL</span>
-      <span class="badge-pixel">CIEE PLAY</span>
-    </div>
+    <!-- Google Fonts Pixel Art -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase JS SDK (v10 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
-    <h1 class="game-title">NUVEM DE IDEIAS</h1>
-    <div class="play-subtitle">► DÊ UM PLAY NA SUA JORNADA! ◄</div>
+    <style>
+        :root {
+            --pixel-cyan: #38b6ff;
+            --pixel-yellow: #facc15;
+            --pixel-green: #22c55e;
+            --pixel-green-dark: #15803d;
+            --pixel-blue-dark: #0f172a;
+            --pixel-blue-mid: #1e3a8a;
+            --pixel-pink: #ec4899;
+        }
 
-    <form id="formIdeia">
-      <!-- Cidade Selection -->
-      <div class="form-group">
-        <label for="cidade">SELECIONE SUA CIDADE:</label>
-        <select id="cidade" required>
-          <option value="">-- ESCOLHA A CIDADE --</option>
-          <option value="Braço do Norte">BRAÇO DO NORTE</option>
-          <option value="Imbituba">IMBITUBA</option>
-          <option value="Tubarão">TUBARÃO</option>
-        </select>
-      </div>
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background: linear-gradient(135deg, #070d1e 0%, #0f172a 40%, #1e3a8a 80%, #1d4ed8 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
 
-      <!-- Turma Selection (Dynamic based on Cidade) -->
-      <div class="form-group">
-        <label for="turma">SELECIONE SUA TURMA:</label>
-        <select id="turma" required disabled>
-          <option value="">-- SELECIONE A CIDADE PRIMEIRO --</option>
-        </select>
-      </div>
+        /* Overlay de Padrão de Pixels */
+        .pixel-grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 8px 8px;
+            pointer-events: none;
+            z-index: 1;
+        }
 
-      <!-- Word / Idea Input Field (100% Anonymous - No Personal Data) -->
-      <div class="form-group">
-        <label for="resposta" class="label-destaque">★ SUA PALAVRA OU IDEIA ★</label>
-        <input type="text" id="resposta" placeholder="EX: INOVAÇÃO" required maxlength="30" autocomplete="off">
-      </div>
+        /* Scanlines CRT simuladas */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.6;
+        }
 
-      <button type="submit" class="btn-play" id="btnSubmit">
-        <span>ENVIAR IDEIA</span>
-        <span style="font-size: 14px;">▶</span>
-      </button>
-    </form>
+        /* Fontes específicas */
+        .font-pixel-title {
+            font-family: 'Press Start 2P', monospace;
+        }
 
-    <div id="status" class="status-msg"></div>
+        .font-pixel-body {
+            font-family: 'VT323', monospace;
+        }
 
-    <div class="ciee-footer">
-      <strong>CIEE SANTA CATARINA</strong>
-      <div class="social-links">@CIEESC | cieesc.org.br</div>
-    </div>
-  </div>
+        /* Bordas Pixeladas Retro */
+        .pixel-box {
+            border: 4px solid #000000;
+            box-shadow: 
+                -4px 0 0 0 #000000,
+                4px 0 0 0 #000000,
+                0 -4px 0 0 #000000,
+                0 4px 0 0 #000000,
+                8px 8px 0 0 rgba(0, 0, 0, 0.5),
+                inset 0 0 15px rgba(56, 182, 255, 0.15);
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(4px);
+        }
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        .pixel-box-glow {
+            border: 4px solid var(--pixel-cyan);
+            box-shadow: 
+                0 0 15px rgba(56, 182, 255, 0.5),
+                inset 0 0 10px rgba(56, 182, 255, 0.3),
+                -4px 0 0 0 #000,
+                4px 0 0 0 #000,
+                0 -4px 0 0 #000,
+                0 4px 0 0 #000;
+        }
 
-    // Firebase Configuration for ciee-tubarao project
-    const firebaseConfig = {
-      apiKey: "AIzaSyBPyd0QyTdfmXjWek1wy2rxSYw7xHiT_to",
-      authDomain: "ciee-tubarao.firebaseapp.com",
-      databaseURL: "https://ciee-tubarao-default-rtdb.firebaseio.com",
-      projectId: "ciee-tubarao",
-      storageBucket: "ciee-tubarao.firebasestorage.app",
-      messagingSenderId: "1031931207865",
-      appId: "1:1031931207865:web:8e40f01b03f82d8394fb68",
-      measurementId: "G-J8BR6R1P1N"
-    };
+        /* Badge Estilo Badge de Fase */
+        .badge-pixel {
+            box-shadow: 3px 3px 0 0 #000000;
+        }
 
-    // Initialize Firebase Services
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+        /* Inputs e Selects com VT323 */
+        select.pixel-input, input.pixel-input {
+            font-family: 'VT323', monospace;
+            font-size: 1.6rem;
+            letter-spacing: 1px;
+            border: 3px solid #3b82f6;
+            outline: none;
+            background-color: #020617;
+            color: #f8fafc;
+            box-shadow: inset 3px 3px 0 #000000;
+            transition: all 0.2s ease;
+        }
 
-    // Dynamic classes mapping per City
-    const turmasPorCidade = {
-      "Braço do Norte": [
-        "Terça matutino",
-        "Terça vespertino"
-      ],
-      "Imbituba": [
-        "Segunda vespertino",
-        "Quarta matutino",
-        "Quarta vespertino",
-        "Quinta matutino",
-        "Quinta vespertino",
-        "Sexta matutino",
-        "Sexta vespertino"
-      ],
-      "Tubarão": [
-        "Segunda vesp (Sofia)",
-        "Segunda vesp (Fabrício)",
-        "Terça matutino",
-        "Terça vesp (Fabrício)",
-        "Terça vesp (João)",
-        "Quarta matutino",
-        "Quarta vespertino",
-        "Quinta matutino",
-        "Quinta vespertino",
-        "Sexta matutino",
-        "Sexta vespertino"
-      ]
-    };
+        select.pixel-input:focus, input.pixel-input:focus {
+            border-color: var(--pixel-cyan);
+            box-shadow: inset 3px 3px 0 #000000, 0 0 12px rgba(56, 182, 255, 0.8);
+        }
 
-    const cidadeSelect = document.getElementById('cidade');
-    const turmaSelect = document.getElementById('turma');
-    const form = document.getElementById('formIdeia');
-    const statusDiv = document.getElementById('status');
-    const btnSubmit = document.getElementById('btnSubmit');
+        /* Botão Arcade 3D Verde */
+        .btn-arcade-green {
+            background-color: var(--pixel-green);
+            color: #ffffff;
+            font-family: 'Press Start 2P', monospace;
+            border: 4px solid #000000;
+            box-shadow: 
+                0 6px 0 0 var(--pixel-green-dark),
+                0 10px 0 0 #000000,
+                0 0 20px rgba(34, 197, 94, 0.4);
+            text-shadow: 2px 2px 0 #000;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            position: relative;
+        }
 
-    // Dynamic update of Turmas select based on selected Cidade
-    cidadeSelect.addEventListener('change', () => {
-      const cidadeSelecionada = cidadeSelect.value;
-      
-      turmaSelect.innerHTML = '';
+        .btn-arcade-green:hover:not(:disabled) {
+            background-color: #4ade80;
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 0 0 var(--pixel-green-dark),
+                0 12px 0 0 #000000,
+                0 0 25px rgba(34, 197, 94, 0.6);
+        }
 
-      if (cidadeSelecionada && turmasPorCidade[cidadeSelecionada]) {
-        turmaSelect.disabled = false;
+        .btn-arcade-green:active:not(:disabled) {
+            transform: translateY(6px);
+            box-shadow: 
+                0 0 0 0 var(--pixel-green-dark),
+                0 4px 0 0 #000000;
+        }
+
+        .btn-arcade-green:disabled {
+            background-color: #4b5563;
+            box-shadow: 0 4px 0 0 #1f2937, 0 6px 0 0 #000;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Animação de Brilho no Título */
+        @keyframes pixelGlow {
+            0%, 100% { text-shadow: 3px 3px 0 #000, 0 0 10px var(--pixel-cyan); }
+            50% { text-shadow: 3px 3px 0 #000, 0 0 20px var(--pixel-cyan), 0 0 30px #60a5fa; }
+        }
+
+        .title-glow {
+            animation: pixelGlow 3s infinite alternate;
+        }
+
+        /* Animações de Nuvens em Pixel Art */
+        .pixel-cloud {
+            position: absolute;
+            opacity: 0.25;
+            pointer-events: none;
+            animation: floatCloud linear infinite;
+        }
+
+        @keyframes floatCloud {
+            from { transform: translateX(-150px); }
+            to { transform: translateX(calc(100vw + 150px)); }
+        }
+
+        /* Modal Retro */
+        .modal-pixel {
+            background: rgba(15, 23, 42, 0.98);
+            border: 4px solid var(--pixel-yellow);
+            box-shadow: 0 0 30px rgba(250, 204, 21, 0.4), inset 0 0 15px rgba(250, 204, 21, 0.2);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen relative overflow-x-hidden">
+
+    <!-- Grid Overlay e CRT Scanlines -->
+    <div class="pixel-grid-overlay"></div>
+    <div class="scanlines"></div>
+
+    <!-- Nuvens Retrô em Segundo Plano -->
+    <div id="cloud-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+    <!-- Conteúdo Principal -->
+    <div class="relative z-10 flex-grow flex flex-col justify-center items-center px-4 py-8">
         
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = '-- ESCOLHA A TURMA --';
-        turmaSelect.appendChild(defaultOption);
+        <!-- Header / Logo Area -->
+        <header class="text-center mb-6 w-full max-w-lg">
+            <!-- Badges da Capa CIEE Play -->
+            <div class="flex items-center justify-center gap-3 mb-4 flex-wrap">
+                <span class="badge-pixel bg-pink-600 text-white text-[10px] sm:text-xs px-3 py-1 font-bold rounded-none uppercase border-2 border-black tracking-wider animate-pulse">
+                    <i class="fa-solid fa-gamepad mr-1"></i> ÚLTIMO NÍVEL
+                </span>
+                <span class="badge-pixel bg-cyan-500 text-black text-[10px] sm:text-xs px-3 py-1 font-extrabold rounded-none uppercase border-2 border-black tracking-wider">
+                    ★ CIEE PLAY ★
+                </span>
+            </div>
 
-        turmasPorCidade[cidadeSelecionada].forEach((turma) => {
-          const opt = document.createElement('option');
-          opt.value = turma;
-          opt.textContent = turma.toUpperCase();
-          turmaSelect.appendChild(opt);
+            <!-- Título Principal da Aplicação -->
+            <h1 class="text-2xl sm:text-4xl font-pixel-title text-cyan-300 title-glow mb-2 tracking-wide leading-tight">
+                NUVEM DE IDEIAS
+            </h1>
+            <p class="font-pixel-body text-xl sm:text-2xl text-blue-200 tracking-wider">
+                COLEÇÃO DE PALAVRAS DA SUA TURMA
+            </p>
+        </header>
+
+        <!-- Card Container Retro Tela de Videogame -->
+        <main class="w-full max-w-lg">
+            <div class="pixel-box rounded-none p-5 sm:p-7 relative">
+                
+                <!-- Detalhes Estéticos Arcade Screen -->
+                <div class="flex justify-between items-center pb-3 mb-5 border-b-2 border-blue-900/60 font-pixel-body text-lg text-cyan-400">
+                    <span class="flex items-center gap-2">
+                        <span class="inline-block w-3 h-3 bg-red-500 animate-ping rounded-full"></span>
+                        <span>MODO: ANÔNIMO</span>
+                    </span>
+                    <span class="text-yellow-400">100% SEGURO</span>
+                </div>
+
+                <!-- Formulário -->
+                <form id="ideiaForm" onsubmit="enviarIdeia(event)" class="space-y-5">
+                    
+                    <!-- Campo 1: Seleção de Cidade -->
+                    <div>
+                        <label for="cidade" class="block font-pixel-title text-xs sm:text-sm text-cyan-300 mb-2 uppercase">
+                            <i class="fa-solid fa-location-dot text-pink-500 mr-1"></i> 1. SUA CIDADE:
+                        </label>
+                        <select id="cidade" onchange="atualizarTurmas()" required class="pixel-input w-full p-3 text-white rounded-none cursor-pointer">
+                            <option value="" disabled selected>-- SELECIONE A CIDADE --</option>
+                            <option value="Braço do Norte">Braço do Norte</option>
+                            <option value="Imbituba">Imbituba</option>
+                            <option value="Tubarão">Tubarão</option>
+                        </select>
+                    </div>
+
+                    <!-- Campo 2: Seleção de Turma (Habilitado Dinamicamente) -->
+                    <div>
+                        <label for="turma" class="block font-pixel-title text-xs sm:text-sm text-cyan-300 mb-2 uppercase">
+                            <i class="fa-solid fa-users text-pink-500 mr-1"></i> 2. SUA TURMA:
+                        </label>
+                        <select id="turma" disabled required class="pixel-input w-full p-3 text-white rounded-none cursor-pointer opacity-50">
+                            <option value="" disabled selected>-- PRIMEIRA SELEICIONE A CIDADE --</option>
+                        </select>
+                    </div>
+
+                    <!-- Campo 3: "SUA PALAVRA OU IDEIA" (Destaque Amarelo) -->
+                    <div class="pt-2">
+                        <div class="bg-yellow-400/10 p-3 sm:p-4 border-2 border-yellow-400 rounded-none mb-2">
+                            <label for="palavra" class="block font-pixel-title text-xs sm:text-sm text-yellow-300 mb-3 uppercase leading-relaxed text-center drop-shadow">
+                                ★ SUA PALAVRA OU IDEIA ★
+                            </label>
+                            
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    id="palavra" 
+                                    maxlength="30" 
+                                    required 
+                                    placeholder="DIGITE AQUI..." 
+                                    oninput="atualizarContador(this)"
+                                    class="pixel-input w-full p-3 text-yellow-200 text-center tracking-widest text-2xl uppercase rounded-none border-2 border-cyan-400 focus:border-yellow-400 bg-slate-950"
+                                >
+                            </div>
+                            
+                            <!-- Contador de Caracteres -->
+                            <div class="flex justify-between items-center mt-2 font-pixel-body text-lg text-yellow-200/80">
+                                <span>MÁXIMO: 30 CHARS</span>
+                                <span id="charCounter" class="font-bold text-yellow-400">0 / 30</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botão "ENVIAR IDEIA ▶" Estilo Verde Arcade 3D -->
+                    <div class="pt-3">
+                        <button 
+                            type="submit" 
+                            id="btnSubmit" 
+                            class="btn-arcade-green w-full py-4 text-sm sm:text-base font-bold uppercase rounded-none tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                            <span>ENVIAR IDEIA</span>
+                            <span class="text-xl">▶</span>
+                        </button>
+                    </div>
+
+                </form>
+
+                <!-- Feedback Visual / Mensagens de Status -->
+                <div id="statusMsg" class="hidden mt-4 p-3 font-pixel-body text-xl text-center rounded-none"></div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Sucesso Pixelado -->
+    <div id="successModal" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center px-4 hidden">
+        <div class="modal-pixel w-full max-w-md p-6 text-center relative">
+            <div class="text-yellow-400 text-4xl mb-3 animate-bounce">
+                ★ +100 XP ★
+            </div>
+            <h3 class="font-pixel-title text-lg sm:text-xl text-yellow-300 mb-3 uppercase">
+                IDEIA REGISTRADA!
+            </h3>
+            <p class="font-pixel-body text-2xl text-cyan-200 mb-6 leading-relaxed">
+                Sua palavra foi enviada com sucesso para a Nuvem de Ideias!
+            </p>
+            <button 
+                onclick="fecharModal()" 
+                class="btn-arcade-green px-6 py-3 text-xs sm:text-sm font-bold uppercase rounded-none inline-block cursor-pointer"
+            >
+                ENVIAR OUTRA ▶
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer com CIEE Santa Catarina -->
+    <footer class="relative z-10 py-6 text-center border-t-2 border-blue-900/40 bg-slate-950/80 backdrop-blur-md mt-auto">
+        <div class="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 max-w-4xl">
+            
+            <div class="text-left text-center sm:text-left">
+                <p class="font-pixel-title text-xs text-blue-300">CIEE Santa Catarina</p>
+                <p class="font-pixel-body text-lg text-slate-400 mt-1">Capacitando e conectando jovens ao futuro.</p>
+            </div>
+
+            <!-- Links Sociais Pixelados -->
+            <div class="flex items-center gap-4 text-xl">
+                <a href="https://www.instagram.com/cieesc/" target="_blank" rel="noopener" class="text-slate-400 hover:text-cyan-400 transition-colors p-2" title="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+                <a href="https://www.linkedin.com/company/cieesc/" target="_blank" rel="noopener" class="text-slate-400 hover:text-cyan-400 transition-colors p-2" title="LinkedIn">
+                    <i class="fa-brands fa-linkedin"></i>
+                </a>
+                <a href="https://www.facebook.com/cieesc" target="_blank" rel="noopener" class="text-slate-400 hover:text-cyan-400 transition-colors p-2" title="Facebook">
+                    <i class="fa-brands fa-facebook"></i>
+                </a>
+                <a href="https://www.youtube.com/user/CIEESantaCatarina" target="_blank" rel="noopener" class="text-slate-400 hover:text-cyan-400 transition-colors p-2" title="YouTube">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+            </div>
+
+        </div>
+    </footer>
+
+    <script>
+        // Configuração Exata do Firebase Realtime Database
+        const firebaseConfig = {
+          apiKey: "AIzaSyBPyd0QyTdfmXjWek1wy2rxSYw7xHiT_to",
+          authDomain: "ciee-tubarao.firebaseapp.com",
+          databaseURL: "https://ciee-tubarao-default-rtdb.firebaseio.com",
+          projectId: "ciee-tubarao",
+          storageBucket: "ciee-tubarao.firebasestorage.app",
+          messagingSenderId: "1031931207865",
+          appId: "1:1031931207865:web:8e40f01b03f82d8394fb68",
+          measurementId: "G-J8BR6R1P1N"
+        };
+
+        // Inicializar Firebase
+        let firebaseApp, database;
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            console.log("Firebase Database Inicializado com Sucesso!");
+        } catch (err) {
+            console.error("Erro ao inicializar Firebase:", err);
+        }
+
+        // Mapeamento Exato de Cidades e Turmas
+        const turmasPorCidade = {
+            "Braço do Norte": [
+                "Terça matutino",
+                "Terça vespertino"
+            ],
+            "Imbituba": [
+                "Segunda vespertino",
+                "Quarta matutino",
+                "Quarta vespertino",
+                "Quinta matutino",
+                "Quinta vespertino",
+                "Sexta matutino",
+                "Sexta vespertino"
+            ],
+            "Tubarão": [
+                "Segunda vesp (Sofia)",
+                "Segunda vesp (Fabrício)",
+                "Terça matutino",
+                "Terça vesp (Fabrício)",
+                "Terça vesp (João)",
+                "Quarta matutino",
+                "Quarta vespertino",
+                "Quinta matutino",
+                "Quinta vespertino",
+                "Sexta matutino",
+                "Sexta vespertino"
+            ]
+        };
+
+        // Atualização Dinâmica do Campo de Turmas
+        function atualizarTurmas() {
+            const cidadeSelect = document.getElementById('cidade');
+            const turmaSelect = document.getElementById('turma');
+            const cidadeSelecionada = cidadeSelect.value;
+
+            // Limpa as opções anteriores
+            turmaSelect.innerHTML = '';
+
+            if (cidadeSelecionada && turmasPorCidade[cidadeSelecionada]) {
+                const turmas = turmasPorCidade[cidadeSelecionada];
+                
+                // Opção padrão
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                defaultOption.textContent = '-- SELECIONE A TURMA --';
+                turmaSelect.appendChild(defaultOption);
+
+                // Adicionar turmas correspondentes
+                turmas.forEach(turma => {
+                    const option = document.createElement('option');
+                    option.value = turma;
+                    option.textContent = turma;
+                    turmaSelect.appendChild(option);
+                });
+
+                // Habilita o select
+                turmaSelect.disabled = false;
+                turmaSelect.classList.remove('opacity-50');
+                play8BitSound('select');
+            } else {
+                turmaSelect.disabled = true;
+                turmaSelect.classList.add('opacity-50');
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                defaultOption.textContent = '-- PRIMEIRA SELEICIONE A CIDADE --';
+                turmaSelect.appendChild(defaultOption);
+            }
+        }
+
+        // Contador de caracteres para a palavra
+        function atualizarContador(input) {
+            const counter = document.getElementById('charCounter');
+            const count = input.value.length;
+            counter.textContent = `${count} / 30`;
+            
+            if (count >= 30) {
+                counter.classList.add('text-red-400');
+            } else {
+                counter.classList.remove('text-red-400');
+            }
+        }
+
+        // Função para enviar formulário ao Firebase Realtime Database
+        async function enviarIdeia(event) {
+            event.preventDefault();
+            
+            const cidade = document.getElementById('cidade').value;
+            const turma = document.getElementById('turma').value;
+            const palavraInput = document.getElementById('palavra');
+            const palavra = palavraInput.value.trim();
+            const btnSubmit = document.getElementById('btnSubmit');
+
+            if (!cidade || !turma || !palavra) {
+                exibirStatus("Preencha todos os campos antes de enviar!", "erro");
+                return;
+            }
+
+            // Desabilita o botão para evitar envio duplo
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<span>ENVIANDO...</span> <i class="fa-solid fa-spinner animate-spin ml-2"></i>`;
+
+            try {
+                // Objeto com anonimato total (sem nome)
+                const novaResposta = {
+                    cidade: cidade,
+                    turma: turma,
+                    palavra: palavra,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+
+                // Envia para a coleção 'respostas' no Firebase Realtime Database
+                await database.ref('respostas').push(novaResposta);
+
+                // Efeito sonoro retrô de vitória
+                play8BitSound('fanfare');
+
+                // Exibe Modal de Sucesso
+                document.getElementById('successModal').classList.remove('hidden');
+
+                // Reset do formulário
+                document.getElementById('ideiaForm').reset();
+                atualizarContador(document.getElementById('palavra'));
+                atualizarTurmas();
+
+            } catch (error) {
+                console.error("Erro ao salvar no Firebase:", error);
+                exibirStatus("ERRO AO CONECTAR COM O SERVIDOR. TENTE NOVAMENTE!", "erro");
+                play8BitSound('error');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = `<span>ENVIAR IDEIA</span> <span class="text-xl">▶</span>`;
+            }
+        }
+
+        // Exibir mensagem de status local
+        function exibirStatus(texto, tipo) {
+            const msgEl = document.getElementById('statusMsg');
+            msgEl.textContent = texto;
+            msgEl.classList.remove('hidden', 'bg-red-950', 'text-red-300', 'border-red-500', 'bg-green-950', 'text-green-300', 'border-green-500');
+            
+            if (tipo === 'erro') {
+                msgEl.classList.add('bg-red-950', 'text-red-300', 'border-2', 'border-red-500');
+            } else {
+                msgEl.classList.add('bg-green-950', 'text-green-300', 'border-2', 'border-green-500');
+            }
+
+            setTimeout(() => {
+                msgEl.classList.add('hidden');
+            }, 4000);
+        }
+
+        // Fechar Modal
+        function fecharModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        // Gerador de Nuvens Retrô Dinâmicas no Fundo
+        function gerarNuvensBackground() {
+            const container = document.getElementById('cloud-container');
+            const numNuvens = 5;
+
+            for (let i = 0; i < numNuvens; i++) {
+                const cloud = document.createElement('div');
+                cloud.className = 'pixel-cloud';
+                
+                // SVG de Nuvem Pixel Art
+                cloud.innerHTML = `
+                    <svg width="120" height="60" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="80" height="30" fill="#38b6ff"/>
+                        <rect x="30" y="10" width="60" height="40" fill="#38b6ff"/>
+                        <rect x="40" y="0" width="40" height="50" fill="#38b6ff"/>
+                        <rect x="10" y="30" width="100" height="15" fill="#38b6ff"/>
+                    </svg>
+                `;
+
+                const topPos = Math.random() * 80; // 0% a 80% da altura
+                const duration = 25 + Math.random() * 35; // 25s a 60s
+                const delay = Math.random() * -30; // offset inicial
+
+                cloud.style.top = `${topPos}%`;
+                cloud.style.animationDuration = `${duration}s`;
+                cloud.style.animationDelay = `${delay}s`;
+
+                container.appendChild(cloud);
+            }
+        }
+
+        // Sintetizador de Som 8-Bit usando Web Audio API
+        function play8BitSound(type) {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+
+                if (type === 'select') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(300, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.05);
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.05);
+                } else if (type === 'fanfare') {
+                    const notes = [440, 554.37, 659.25, 880];
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'square';
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0.1, ctx.currentTime + idx * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (idx + 1) * 0.08 + 0.1);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(ctx.currentTime + idx * 0.08);
+                        osc.stop(ctx.currentTime + (idx + 1) * 0.08 + 0.1);
+                    });
+                } else if (type === 'error') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(90, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.2);
+                }
+            } catch (e) {
+                // Audio bloqueado ou não suportado
+            }
+        }
+
+        // Inicializar efeitos na carga da página
+        window.addEventListener('DOMContentLoaded', () => {
+            gerarNuvensBackground();
         });
-      } else {
-        turmaSelect.disabled = true;
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = '-- SELECIONE A CIDADE PRIMEIRO --';
-        turmaSelect.appendChild(defaultOption);
-      }
-    });
-
-    // Handle Form Submission (Strictly Anonymous)
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const cidade = cidadeSelect.value;
-      const turma = turmaSelect.value;
-      const resposta = document.getElementById('resposta').value.trim().toLowerCase();
-
-      if (!cidade || !turma || !resposta) return;
-
-      // Lock button state during submission
-      btnSubmit.disabled = true;
-      btnSubmit.innerHTML = '<span>ENVIANDO...</span><span>⌛</span>';
-      statusDiv.className = 'status-msg';
-      statusDiv.innerText = '';
-
-      // Push anonymous data entry to Firebase under 'respostas'
-      push(ref(db, 'respostas'), {
-        cidade: cidade,
-        turma: turma,
-        palavra: resposta,
-        timestamp: Date.now()
-      }).then(() => {
-        statusDiv.className = 'status-msg success';
-        statusDiv.innerText = '► IDEIA ENVIADA COM SUCESSO!';
-        document.getElementById('resposta').value = '';
-        
-        btnSubmit.disabled = false;
-        btnSubmit.innerHTML = '<span>ENVIAR IDEIA</span><span style="font-size: 14px;">▶</span>';
-
-        setTimeout(() => {
-          statusDiv.innerText = '';
-          statusDiv.className = 'status-msg';
-        }, 4500);
-      }).catch((err) => {
-        console.error('Erro ao enviar:', err);
-        statusDiv.className = 'status-msg error';
-        statusDiv.innerText = '✖ ERRO AO ENVIAR. TENTE NOVAMENTE!';
-        
-        btnSubmit.disabled = false;
-        btnSubmit.innerHTML = '<span>ENVIAR IDEIA</span><span style="font-size: 14px;">▶</span>';
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
