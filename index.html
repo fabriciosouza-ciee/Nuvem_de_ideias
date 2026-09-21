@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Nuvem de Ideias - CIEE Play</title>
 
   <!-- Google Fonts: Pixel Art Fonts -->
@@ -18,22 +18,24 @@
     }
 
     :root {
-      --bg-purple: #2a1b5c;
+      --bg-gradient-start: #1e1140;
+      --bg-gradient-end: #3b1c7a;
       --card-bg: #1f1640;
       --accent-cyan: #00f0ff;
       --accent-yellow: #ffd700;
-      --arcade-green: #2ecc71;
-      --arcade-green-dark: #1b8a4a;
+      --arcade-green: #00e676;
+      --arcade-green-hover: #00b0ff;
+      --arcade-green-dark: #00813c;
       --pixel-black: #0d081f;
       --text-violet: #d4c7f5;
     }
 
     body {
       font-family: 'VT323', monospace;
-      background-color: var(--bg-purple);
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
       background-image: 
-        radial-gradient(#4d348a 20%, transparent 20%),
-        radial-gradient(#4d348a 20%, transparent 20%);
+        radial-gradient(rgba(77, 52, 138, 0.4) 20%, transparent 20%),
+        radial-gradient(rgba(77, 52, 138, 0.4) 20%, transparent 20%);
       background-size: 16px 16px;
       background-position: 0 0, 8px 8px;
       color: #ffffff;
@@ -43,19 +45,21 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      width: 100%;
     }
 
+    /* Main arcade container card */
     .game-card {
       background-color: var(--card-bg);
       border: 4px solid var(--pixel-black);
-      border-radius: 8px;
+      border-radius: 12px;
       box-shadow: 
         inset 0 0 0 2px #3c2a75,
-        0 8px 0px var(--pixel-black),
-        0 0 20px rgba(0, 240, 255, 0.15);
+        0 10px 0px var(--pixel-black),
+        0 0 25px rgba(0, 240, 255, 0.2);
       padding: 24px 20px;
       width: 100%;
-      max-width: 460px;
+      max-width: 480px;
       position: relative;
     }
 
@@ -63,24 +67,26 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      gap: 8px;
+      margin-bottom: 16px;
     }
 
     .badge-pixel {
       font-family: 'Press Start 2P', cursive;
-      font-size: 8px;
+      font-size: 9px;
       background-color: var(--pixel-black);
       color: var(--accent-yellow);
       border: 2px solid var(--accent-cyan);
-      padding: 5px 8px;
+      padding: 6px 10px;
       border-radius: 4px;
       box-shadow: 2px 2px 0px #000;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     h1.game-title {
       font-family: 'Press Start 2P', cursive;
-      font-size: 16px;
+      font-size: 18px;
       color: var(--accent-cyan);
       text-shadow: 3px 3px 0px var(--pixel-black), -1px -1px 0px #ffffff;
       text-align: center;
@@ -100,7 +106,7 @@
     }
 
     .form-group {
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
 
     label {
@@ -113,13 +119,14 @@
       line-height: 1.4;
     }
 
-    /* Highlighted label for 'Sua palavra ou ideia' */
+    /* Highlighted prompt label for word entry */
     label.label-destaque {
       font-size: 11px;
       color: var(--accent-yellow);
       text-shadow: 2px 2px 0px var(--pixel-black);
-      margin-top: 10px;
+      margin-top: 12px;
       margin-bottom: 10px;
+      text-align: center;
     }
 
     input, select {
@@ -127,23 +134,25 @@
       font-size: 22px;
       letter-spacing: 1px;
       width: 100%;
-      padding: 10px 12px;
+      padding: 12px 14px;
       background-color: #ffffff;
       color: #0d081f;
       border: 3px solid var(--pixel-black);
-      border-radius: 4px;
+      border-radius: 6px;
       box-shadow: inset 3px 3px 0px #b8b8b8;
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    /* Larger font for the main input */
+    /* Enlarged input box for the main word submission */
     #resposta {
       font-size: 26px;
-      padding: 12px 14px;
+      padding: 14px 16px;
+      text-align: center;
+      text-transform: uppercase;
       border: 3px solid var(--accent-cyan);
       background-color: #ffffff;
-      box-shadow: inset 3px 3px 0px #cfd8dc, 0 0 10px rgba(0, 240, 255, 0.3);
+      box-shadow: inset 3px 3px 0px #cfd8dc, 0 0 12px rgba(0, 240, 255, 0.35);
     }
 
     input:focus, select:focus {
@@ -155,45 +164,46 @@
       cursor: pointer;
       background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%230d081f" d="M0 2h12v2H0zM2 4h8v2H2zM4 6h4v2H4zM6 8h0v2H6z"/></svg>');
       background-repeat: no-repeat;
-      background-position: right 12px center;
+      background-position: right 14px center;
       appearance: none;
       -webkit-appearance: none;
-      padding-right: 32px;
+      padding-right: 36px;
     }
 
     select:disabled {
-      background-color: #e0e0e0;
-      color: #777777;
+      background-color: #d1d5db;
+      color: #6b7280;
       cursor: not-allowed;
     }
 
     .btn-play {
       font-family: 'Press Start 2P', cursive;
-      font-size: 11px;
+      font-size: 12px;
       width: 100%;
-      margin-top: 14px;
-      padding: 16px 12px;
+      margin-top: 16px;
+      padding: 16px 14px;
       background-color: var(--arcade-green);
-      color: #ffffff;
+      color: #0d081f;
       border: 3px solid var(--pixel-black);
-      border-radius: 6px;
+      border-radius: 8px;
       box-shadow: 0 6px 0px var(--arcade-green-dark), 0 9px 0px var(--pixel-black);
       cursor: pointer;
-      text-shadow: 2px 2px 0px var(--pixel-black);
+      font-weight: bold;
+      text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.4);
       position: relative;
       top: 0;
       transition: all 0.1s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
     }
 
     .btn-play:hover {
-      background-color: #34e7e4;
-      box-shadow: 0 6px 0px #0fbcf9, 0 9px 0px var(--pixel-black);
-      color: #0d081f;
-      text-shadow: none;
+      background-color: var(--arcade-green-hover);
+      box-shadow: 0 6px 0px #0277bd, 0 9px 0px var(--pixel-black);
+      color: #ffffff;
+      text-shadow: 1px 1px 0px var(--pixel-black);
     }
 
     .btn-play:active {
@@ -206,6 +216,8 @@
       box-shadow: 0 4px 0px #34495e, 0 7px 0px var(--pixel-black);
       cursor: not-allowed;
       opacity: 0.8;
+      color: #ffffff;
+      text-shadow: none;
     }
 
     .status-msg {
@@ -213,24 +225,25 @@
       font-size: 9px;
       text-align: center;
       margin-top: 20px;
-      min-height: 24px;
-      line-height: 1.5;
-      padding: 6px;
-      border-radius: 4px;
+      min-height: 28px;
+      line-height: 1.6;
+      padding: 8px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
     }
 
     .status-msg.success {
       color: #00ff66;
       text-shadow: 1px 1px 0px #000;
-      background-color: rgba(0, 255, 102, 0.1);
-      border: 1px dashed #00ff66;
+      background-color: rgba(0, 255, 102, 0.12);
+      border: 2px dashed #00ff66;
     }
 
     .status-msg.error {
       color: #ff3838;
       text-shadow: 1px 1px 0px #000;
-      background-color: rgba(255, 56, 56, 0.1);
-      border: 1px dashed #ff3838;
+      background-color: rgba(255, 56, 56, 0.12);
+      border: 2px dashed #ff3838;
     }
 
     .ciee-footer {
@@ -250,7 +263,50 @@
 
     .social-links {
       color: var(--accent-yellow);
-      margin-top: 4px;
+      margin-top: 6px;
+    }
+
+    /* Mobile Responsiveness Adjustments */
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      .game-card {
+        padding: 18px 14px;
+      }
+
+      h1.game-title {
+        font-size: 15px;
+      }
+
+      .play-subtitle {
+        font-size: 7px;
+        margin-bottom: 18px;
+      }
+
+      label {
+        font-size: 8px;
+      }
+
+      label.label-destaque {
+        font-size: 10px;
+      }
+
+      input, select {
+        font-size: 19px;
+        padding: 10px 12px;
+      }
+
+      #resposta {
+        font-size: 22px;
+        padding: 12px;
+      }
+
+      .btn-play {
+        font-size: 10px;
+        padding: 14px 10px;
+      }
     }
   </style>
 </head>
@@ -286,13 +342,7 @@
         </select>
       </div>
 
-      <!-- Nome Input -->
-      <div class="form-group">
-        <label for="nome">SEU NOME (OPCIONAL):</label>
-        <input type="text" id="nome" placeholder="ANÔNIMO" maxlength="40">
-      </div>
-
-      <!-- Resposta Input (Larger Font Label) -->
+      <!-- Word / Idea Input Field (100% Anonymous - No Name Field) -->
       <div class="form-group">
         <label for="resposta" class="label-destaque">★ SUA PALAVRA OU IDEIA ★</label>
         <input type="text" id="resposta" placeholder="EX: INOVAÇÃO" required maxlength="30" autocomplete="off">
@@ -316,7 +366,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Firebase Config for ciee-tubarao
+    // Firebase Configuration for ciee-tubarao project
     const firebaseConfig = {
       apiKey: "AIzaSyBPyd0QyTdfmXjWek1wy2rxSYw7xHiT_to",
       authDomain: "ciee-tubarao.firebaseapp.com",
@@ -328,10 +378,11 @@
       measurementId: "G-J8BR6R1P1N"
     };
 
+    // Initialize Firebase Services
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Mapeamento de Turmas por Cidade
+    // Classes mapping per City
     const turmasPorCidade = {
       "Braço do Norte": [
         "Terça matutino",
@@ -367,11 +418,10 @@
     const statusDiv = document.getElementById('status');
     const btnSubmit = document.getElementById('btnSubmit');
 
-    // Lógica para atualizar o menu de Turmas ao escolher a Cidade
+    // Dynamic update of Turmas select based on selected Cidade
     cidadeSelect.addEventListener('change', () => {
       const cidadeSelecionada = cidadeSelect.value;
       
-      // Limpa opções anteriores
       turmaSelect.innerHTML = '';
 
       if (cidadeSelecionada && turmasPorCidade[cidadeSelecionada]) {
@@ -397,26 +447,26 @@
       }
     });
 
-    // Submissão do formulário
+    // Handle Form Submission (Anonymous)
     form.addEventListener('submit', (e) => {
       e.preventDefault();
 
       const cidade = cidadeSelect.value;
       const turma = turmaSelect.value;
-      const nome = document.getElementById('nome').value.trim() || 'Anônimo';
       const resposta = document.getElementById('resposta').value.trim().toLowerCase();
 
       if (!cidade || !turma || !resposta) return;
 
+      // Lock button state during submission
       btnSubmit.disabled = true;
       btnSubmit.innerHTML = '<span>ENVIANDO...</span><span>⌛</span>';
       statusDiv.className = 'status-msg';
       statusDiv.innerText = '';
 
+      // Push anonymous data entry to Firebase
       push(ref(db, 'respostas'), {
         cidade: cidade,
         turma: turma,
-        nome: nome,
         palavra: resposta,
         timestamp: Date.now()
       }).then(() => {
@@ -430,7 +480,7 @@
         setTimeout(() => {
           statusDiv.innerText = '';
           statusDiv.className = 'status-msg';
-        }, 4000);
+        }, 4500);
       }).catch((err) => {
         console.error('Erro ao enviar:', err);
         statusDiv.className = 'status-msg error';
