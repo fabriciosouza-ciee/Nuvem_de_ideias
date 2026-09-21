@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Orientador - Nuvem em Tempo Real</title>
+  <!-- Biblioteca WordCloud2.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; color: white; margin: 0; padding: 20px; text-align: center; }
+    h1 { margin-bottom: 5px; }
+    .controls { margin-bottom: 20px; }
+    select, button { padding: 10px 15px; font-size: 16px; border-radius: 6px; border: none; margin: 5px; }
+    #canvas-container { display: flex; justify-content: center; margin-top: 20px; }
+    #canvasNuvem { background-color: #16213e; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+  </style>
+</head>
+<body>
+
+  <h1>Nuvem de Ideias em Tempo Real</h1>
+  
+  <div class="controls">
+    <label for="filtroTurma">Filtrar por Turma: </label>
+    <select id="filtroTurma">
+      <option value="TODAS">Todas as Turmas</option>
+      <option value="Turma A">Turma A</option>
+      <option value="Turma B">Turma B</option>
+      <option value="Turma C">Turma C</option>
+    </select>
+    <button id="btnLimpar" style="background-color: #e94560; color: white; cursor: pointer;">Limpar Respostas</button>
+  </div>
+
+  <div id="canvas-container">
+    <canvas id="canvasNuvem" width="800" height="500"></canvas>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // Substitua com as mesmas credenciais do seu projeto Firebase
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://SEU_PROJECT_ID-default-rtdb.firebaseio.com",
+      projectId: "SEU_PROJECT_ID",
+      storageBucket: "SEU_PROJECT_ID.appspot.com",
+      messagingSenderId: "SEU_SENDER_ID",
+      appId: "SEU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let dadosTotais = {};
+
+    // Função para atualizar o canvas da nuvem
+    function desenharNuvem() {
+      const turmaSelecionada = document.getElementById('filtroTurma').value;
+      const frequenciaPalavras = {};
+
+      // Contagem de palavras filtrada por turma
+      Object.values(dadosTotais).forEach(item => {
+        if (turmaSelecionada === 'TODAS' || item.turma === turmaSelecionada) {
+          const palavra = item.palavra;
+          frequenciaPalavras[palavra] = (frequenciaPalavras[palavra] || 0) + 1;
+        }
+      });
+
+      // Converte para o formato aceito pela biblioteca: [['palavra', frequencia], ...]
+      const listaNuvem = Object.keys(frequenciaPalavras).map(p => [p, frequenciaPalavras[p] * 12 + 10]); // Multiplica para dar escala no tamanho da fonte
+
+      const canvas = document.getElementById('canvasNuvem');
+
+      WordCloud(canvas, {
+        list: listaNuvem,
+        gridSize: 8,
+        weightFactor: 1,
+        fontFamily: 'Segoe UI, sans-serif',
+        color: 'random-light',
+        backgroundColor: '#16213e',
+        rotateRatio: 0.3
+      });
+    }
+
+    // Escuta mudanças em tempo real do banco Firebase
+    onValue(ref(db, 'respostas'), (snapshot) => {
+      dadosTotais = snapshot.val() || {};
+      desenharNuvem();
+    });
+
+    // Escuta alteração do filtro de turma
+    document.getElementById('filtroTurma').addEventListener('change', desenharNuvem);
+
+    // Botão para resetar os dados
+    document.getElementById('btnLimpar').addEventListener('click', () => {
+      if (confirm("Tem certeza que deseja apagar todas as respostas armazenadas?")) {
+        remove(ref(db, 'respostas'));
+      }
+    });
+  </script>
+</body>
+</html>
