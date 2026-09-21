@@ -109,51 +109,46 @@
       outline: none;
     }
 
-    /* Campo de Senha Discreto para a Trava de Segurança */
     .input-pass {
       font-family: 'VT323', monospace;
-      font-size: 16px;
-      padding: 6px;
+      font-size: 18px;
+      padding: 8px;
       background: #0d001e;
-      color: var(--accent-yellow);
+      color: #fff;
       border: 2px solid var(--accent-red);
       border-radius: 4px;
       outline: none;
-      margin-bottom: 6px;
-      text-align: center;
       transition: all 0.3s ease;
     }
 
     .input-pass.unlocked {
       border-color: var(--accent-green);
       color: var(--accent-green);
-      box-shadow: 0 0 8px var(--accent-green);
     }
 
     .btn-reset {
       font-family: 'Press Start 2P', cursive;
       font-size: 10px;
-      background: #444444;
-      color: #888888;
-      border: none;
-      padding: 12px;
-      cursor: not-allowed;
-      border-radius: 4px;
-      box-shadow: 0 4px #222222;
-      transition: all 0.2s ease;
-      align-self: flex-end;
-      height: 42px;
-      width: 100%;
-    }
-
-    .btn-reset.active {
       background: var(--accent-red);
       color: white;
+      border: none;
+      padding: 12px;
       cursor: pointer;
+      border-radius: 4px;
       box-shadow: 0 4px #880022;
+      transition: all 0.1s;
+      align-self: flex-end;
+      height: 42px;
     }
 
-    .btn-reset.active:active {
+    .btn-reset:disabled {
+      background: #444444;
+      color: #888888;
+      box-shadow: 0 4px #222222;
+      cursor: not-allowed;
+    }
+
+    .btn-reset:not(:disabled):active {
       transform: translateY(3px);
       box-shadow: 0 1px #880022;
     }
@@ -199,7 +194,7 @@
       <span class="badge">CIEE PLAY</span>
     </div>
 
-    <!-- Filtros por Cidade, Turma e Botão de Limpar -->
+    <!-- Filtros por Cidade e Turma -->
     <div class="filters-grid">
       <div class="field-group">
         <label for="filtroCidade">CIDADE:</label>
@@ -219,10 +214,11 @@
       </div>
 
       <div class="field-group">
-        <label for="senhaReset">SENHA SEGURA:</label>
+        <label for="senhaReset">DESBLOQUEAR:</label>
         <input type="password" id="senhaReset" class="input-pass" placeholder="Palavra-passe..." autocomplete="off">
-        <button id="btnLimpar" class="btn-reset" disabled>🔒 LIMPAR TUDO</button>
       </div>
+
+      <button id="btnLimpar" class="btn-reset" disabled>🔒 LIMPAR TUDO</button>
     </div>
 
     <div class="stats" id="contadorRespostas">RESPOSTAS RECEBIDAS: 0</div>
@@ -253,7 +249,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Mapeamento de Turmas por Cidade
+    // Mapeamento de Turmas por Cidade (idêntico ao index.html)
     const turmasPorCidade = {
       "Braço do Norte": ["Terça matutino", "Terça vespertino"],
       "Imbituba": [
@@ -276,17 +272,15 @@
 
     let dadosTotais = {};
 
-    // Verificação dinâmica da senha em tempo real
+    // Trava de segurança para o botão Limpar
     senhaReset.addEventListener('input', () => {
       const valor = senhaReset.value.trim().toLowerCase();
       if (valor === 'malfeitofeito') {
         btnLimpar.disabled = false;
-        btnLimpar.classList.add('active');
         btnLimpar.innerText = "🔓 LIMPAR TUDO";
         senhaReset.classList.add('unlocked');
       } else {
         btnLimpar.disabled = true;
-        btnLimpar.classList.remove('active');
         btnLimpar.innerText = "🔒 LIMPAR TUDO";
         senhaReset.classList.remove('unlocked');
       }
@@ -334,6 +328,7 @@
 
       const canvas = document.getElementById('canvasNuvem');
 
+      // Ajusta o tamanho interno do canvas ao container
       canvas.width = canvas.parentElement.clientWidth;
       canvas.height = canvas.parentElement.clientHeight;
 
@@ -363,14 +358,13 @@
 
     // Botão Limpar Tudo
     btnLimpar.addEventListener('click', () => {
-      if (!btnLimpar.disabled) {
-        if (confirm("ATENÇÃO: Deseja apagar permanentemente todas as respostas registradas no sistema?")) {
-          remove(ref(db, 'respostas')).then(() => {
-            alert("Registros apagados com sucesso!");
-            senhaReset.value = '';
-            senhaReset.dispatchEvent(new Event('input'));
-          }).catch(err => alert("Erro ao apagar: " + err.message));
-        }
+      if (btnLimpar.disabled) return;
+      if (confirm("ATENÇÃO: Deseja apagar permanentemente todas as respostas registradas no sistema?")) {
+        remove(ref(db, 'respostas')).then(() => {
+          alert("Registros apagados com sucesso!");
+          senhaReset.value = '';
+          senhaReset.dispatchEvent(new Event('input'));
+        }).catch(err => alert("Erro ao apagar: " + err.message));
       }
     });
 
