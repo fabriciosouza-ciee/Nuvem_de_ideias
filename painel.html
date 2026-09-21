@@ -77,14 +77,13 @@
 
     .filters-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 15px;
       margin-bottom: 20px;
       background: rgba(0,0,0,0.3);
       padding: 15px;
       border-radius: 6px;
       border: 1px solid rgba(255,255,255,0.1);
-      align-items: flex-end;
     }
 
     .field-group {
@@ -110,41 +109,22 @@
       outline: none;
     }
 
-    /* Container de Segurança para Limpeza */
-    .reset-container {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      background: rgba(255, 51, 102, 0.1);
-      padding: 8px;
-      border: 1px dashed var(--accent-red);
-      border-radius: 6px;
-      transition: all 0.3s ease;
-    }
-
-    .reset-container.unlocked {
-      background: rgba(32, 224, 112, 0.15);
-      border-color: var(--accent-green);
-    }
-
+    /* Campo de Senha Discreto para a Trava de Segurança */
     .input-pass {
       font-family: 'VT323', monospace;
       font-size: 16px;
-      padding: 5px 8px;
+      padding: 6px;
       background: #0d001e;
       color: var(--accent-yellow);
       border: 2px solid var(--accent-red);
       border-radius: 4px;
       outline: none;
+      margin-bottom: 6px;
       text-align: center;
       transition: all 0.3s ease;
     }
 
-    .input-pass:focus {
-      box-shadow: 0 0 8px var(--accent-red);
-    }
-
-    .reset-container.unlocked .input-pass {
+    .input-pass.unlocked {
       border-color: var(--accent-green);
       color: var(--accent-green);
       box-shadow: 0 0 8px var(--accent-green);
@@ -152,15 +132,18 @@
 
     .btn-reset {
       font-family: 'Press Start 2P', cursive;
-      font-size: 9px;
-      background: #555555;
+      font-size: 10px;
+      background: #444444;
       color: #888888;
       border: none;
-      padding: 10px;
+      padding: 12px;
       cursor: not-allowed;
       border-radius: 4px;
-      box-shadow: 0 3px #333333;
+      box-shadow: 0 4px #222222;
       transition: all 0.2s ease;
+      align-self: flex-end;
+      height: 42px;
+      width: 100%;
     }
 
     .btn-reset.active {
@@ -171,7 +154,7 @@
     }
 
     .btn-reset.active:active {
-      transform: translateY(2px);
+      transform: translateY(3px);
       box-shadow: 0 1px #880022;
     }
 
@@ -204,6 +187,7 @@
     @media (max-width: 600px) {
       h1 { font-size: 12px; }
       .cloud-box { height: 350px; }
+      .btn-reset { align-self: stretch; margin-top: 10px; }
     }
   </style>
 </head>
@@ -215,7 +199,7 @@
       <span class="badge">CIEE PLAY</span>
     </div>
 
-    <!-- Filtros por Cidade, Turma e Segurança -->
+    <!-- Filtros por Cidade, Turma e Botão de Limpar -->
     <div class="filters-grid">
       <div class="field-group">
         <label for="filtroCidade">CIDADE:</label>
@@ -234,10 +218,9 @@
         </select>
       </div>
 
-      <!-- Campo Discreto e Dinâmico de Segurança para Limpeza -->
-      <div class="reset-container" id="resetContainer">
-        <label for="senhaReset" style="font-size: 8px;">DESBLOQUEAR:</label>
-        <input type="password" id="senhaReset" class="input-pass" placeholder="Senha..." autocomplete="off">
+      <div class="field-group">
+        <label for="senhaReset">SENHA SEGURA:</label>
+        <input type="password" id="senhaReset" class="input-pass" placeholder="Palavra-passe..." autocomplete="off">
         <button id="btnLimpar" class="btn-reset" disabled>🔒 LIMPAR TUDO</button>
       </div>
     </div>
@@ -290,23 +273,22 @@
     const contador = document.getElementById('contadorRespostas');
     const btnLimpar = document.getElementById('btnLimpar');
     const senhaReset = document.getElementById('senhaReset');
-    const resetContainer = document.getElementById('resetContainer');
 
     let dadosTotais = {};
 
-    // Validação da senha "malfeitofeito" em tempo real
+    // Verificação dinâmica da senha em tempo real
     senhaReset.addEventListener('input', () => {
       const valor = senhaReset.value.trim().toLowerCase();
       if (valor === 'malfeitofeito') {
         btnLimpar.disabled = false;
         btnLimpar.classList.add('active');
         btnLimpar.innerText = "🔓 LIMPAR TUDO";
-        resetContainer.classList.add('unlocked');
+        senhaReset.classList.add('unlocked');
       } else {
         btnLimpar.disabled = true;
         btnLimpar.classList.remove('active');
         btnLimpar.innerText = "🔒 LIMPAR TUDO";
-        resetContainer.classList.remove('unlocked');
+        senhaReset.classList.remove('unlocked');
       }
     });
 
