@@ -1,106 +1,649 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel do Orientador - Nuvem em Tempo Real</title>
-  <!-- Biblioteca WordCloud2.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
-  <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; color: white; margin: 0; padding: 20px; text-align: center; }
-    h1 { margin-bottom: 5px; }
-    .controls { margin-bottom: 20px; }
-    select, button { padding: 10px 15px; font-size: 16px; border-radius: 6px; border: none; margin: 5px; }
-    #canvas-container { display: flex; justify-content: center; margin-top: 20px; }
-    #canvasNuvem { background-color: #16213e; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
-  </style>
-</head>
-<body>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel das Nuvens</title>
+    
+    <!-- Google Fonts Pixel Art -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase JS SDK (v10 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
-  <h1>Nuvem de Ideias em Tempo Real</h1>
-  
-  <div class="controls">
-    <label for="filtroTurma">Filtrar por Turma: </label>
-    <select id="filtroTurma">
-      <option value="TODAS">Todas as Turmas</option>
-      <option value="Turma A">Turma A</option>
-      <option value="Turma B">Turma B</option>
-      <option value="Turma C">Turma C</option>
-    </select>
-    <button id="btnLimpar" style="background-color: #e94560; color: white; cursor: pointer;">Limpar Respostas</button>
-  </div>
+    <!-- WordCloud2.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
 
-  <div id="canvas-container">
-    <canvas id="canvasNuvem" width="800" height="500"></canvas>
-  </div>
-
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-    // Substitua com as mesmas credenciais do seu projeto Firebase
-    const firebaseConfig = {
-  apiKey: "AIzaSyBPyd0QyTdfmXjWek1wy2rxSYw7xHiT_to",
-  authDomain: "ciee-tubarao.firebaseapp.com",
-  databaseURL: "https://ciee-tubarao-default-rtdb.firebaseio.com",
-  projectId: "ciee-tubarao",
-  storageBucket: "ciee-tubarao.firebasestorage.app",
-  messagingSenderId: "1031931207865",
-  appId: "1:1031931207865:web:8e40f01b03f82d8394fb68",
-  measurementId: "G-J8BR6R1P1N"
-};
-
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    let dadosTotais = {};
-
-    // Função para atualizar o canvas da nuvem
-    function desenharNuvem() {
-      const turmaSelecionada = document.getElementById('filtroTurma').value;
-      const frequenciaPalavras = {};
-
-      // Contagem de palavras filtrada por turma
-      Object.values(dadosTotais).forEach(item => {
-        if (turmaSelecionada === 'TODAS' || item.turma === turmaSelecionada) {
-          const palavra = item.palavra;
-          frequenciaPalavras[palavra] = (frequenciaPalavras[palavra] || 0) + 1;
+    <style>
+        :root {
+            --pixel-cyan: #38b6ff;
+            --pixel-yellow: #facc15;
+            --pixel-green: #22c55e;
+            --pixel-pink: #ec4899;
+            --pixel-red: #ef4444;
+            --pixel-red-dark: #991b1b;
+            --pixel-purple: #8b5cf6;
         }
-      });
 
-      // Converte para o formato aceito pela biblioteca: [['palavra', frequencia], ...]
-      const listaNuvem = Object.keys(frequenciaPalavras).map(p => [p, frequenciaPalavras[p] * 12 + 10]); // Multiplica para dar escala no tamanho da fonte
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background: linear-gradient(135deg, #0a0c1b 0%, #111827 40%, #1b1035 80%, #2e1065 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
 
-      const canvas = document.getElementById('canvasNuvem');
+        /* Overlay de Padrão de Pixels */
+        .pixel-grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 8px 8px;
+            pointer-events: none;
+            z-index: 1;
+        }
 
-      WordCloud(canvas, {
-        list: listaNuvem,
-        gridSize: 8,
-        weightFactor: 1,
-        fontFamily: 'Segoe UI, sans-serif',
-        color: 'random-light',
-        backgroundColor: '#16213e',
-        rotateRatio: 0.3
-      });
-    }
+        /* Scanlines CRT simuladas */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.5;
+        }
 
-    // Escuta mudanças em tempo real do banco Firebase
-    onValue(ref(db, 'respostas'), (snapshot) => {
-      dadosTotais = snapshot.val() || {};
-      desenharNuvem();
-    });
+        /* Typography Helper Classes */
+        .font-pixel-title {
+            font-family: 'Press Start 2P', monospace;
+        }
 
-    // Escuta alteração do filtro de turma
-    document.getElementById('filtroTurma').addEventListener('change', desenharNuvem);
+        .font-pixel-body {
+            font-family: 'VT323', monospace;
+        }
 
-    // Botão para resetar os dados
-    document.getElementById('btnLimpar').addEventListener('click', () => {
-      if (confirm("Tem certeza que deseja apagar todas as respostas armazenadas?")) {
-        remove(ref(db, 'respostas'));
-      }
-    });
-  </script>
+        /* Bordas Pixeladas Retro */
+        .pixel-box {
+            border: 4px solid #000000;
+            box-shadow: 
+                -4px 0 0 0 #000000,
+                4px 0 0 0 #000000,
+                0 -4px 0 0 #000000,
+                0 4px 0 0 #000000,
+                8px 8px 0 0 rgba(0, 0, 0, 0.6),
+                inset 0 0 15px rgba(56, 182, 255, 0.15);
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(4px);
+        }
+
+        /* Moldura Neon para Tela do Canvas Wordcloud */
+        .pixel-screen-glow {
+            border: 4px solid var(--pixel-cyan);
+            box-shadow: 
+                0 0 20px rgba(56, 182, 255, 0.6),
+                inset 0 0 15px rgba(56, 182, 255, 0.2),
+                -4px 0 0 0 #000000,
+                4px 0 0 0 #000000,
+                0 -4px 0 0 #000000,
+                0 4px 0 0 #000000;
+        }
+
+        /* Badges Pixel */
+        .badge-pixel {
+            box-shadow: 3px 3px 0 0 #000000;
+        }
+
+        /* Selects com VT323 estilo Gamer */
+        select.pixel-input {
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            border: 3px solid #3b82f6;
+            outline: none;
+            background-color: #020617;
+            color: #f8fafc;
+            box-shadow: inset 3px 3px 0 #000000;
+            transition: all 0.2s ease;
+        }
+
+        select.pixel-input:focus {
+            border-color: var(--pixel-cyan);
+            box-shadow: inset 3px 3px 0 #000000, 0 0 12px rgba(56, 182, 255, 0.8);
+        }
+
+        /* Botão Arcade 3D Vermelho (Reset) */
+        .btn-arcade-red {
+            background-color: var(--pixel-red);
+            color: #ffffff;
+            font-family: 'Press Start 2P', monospace;
+            border: 4px solid #000000;
+            box-shadow: 
+                0 6px 0 0 var(--pixel-red-dark),
+                0 10px 0 0 #000000,
+                0 0 20px rgba(239, 68, 68, 0.4);
+            text-shadow: 2px 2px 0 #000;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            position: relative;
+        }
+
+        .btn-arcade-red:hover:not(:disabled) {
+            background-color: #f87171;
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 0 0 var(--pixel-red-dark),
+                0 12px 0 0 #000000,
+                0 0 25px rgba(239, 68, 68, 0.6);
+        }
+
+        .btn-arcade-red:active:not(:disabled) {
+            transform: translateY(6px);
+            box-shadow: 
+                0 0 0 0 var(--pixel-red-dark),
+                0 4px 0 0 #000000;
+        }
+
+        /* Animação do Título */
+        @keyframes pixelGlow {
+            0%, 100% { text-shadow: 3px 3px 0 #000, 0 0 12px var(--pixel-cyan); }
+            50% { text-shadow: 3px 3px 0 #000, 0 0 22px var(--pixel-cyan), 0 0 32px #c084fc; }
+        }
+
+        .title-glow {
+            animation: pixelGlow 3s infinite alternate;
+        }
+
+        /* Partículas de Pixels Flutuantes */
+        .pixel-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(56, 182, 255, 0.4);
+            pointer-events: none;
+            animation: floatParticle linear infinite;
+        }
+
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Modal Retro */
+        .modal-pixel {
+            background: rgba(15, 23, 42, 0.98);
+            border: 4px solid var(--pixel-yellow);
+            box-shadow: 0 0 35px rgba(250, 204, 21, 0.4), inset 0 0 15px rgba(250, 204, 21, 0.2);
+        }
+
+        #wordcloud-canvas {
+            width: 100%;
+            height: 520px;
+            display: block;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen relative overflow-x-hidden">
+
+    <!-- Grid Overlay e CRT Scanlines -->
+    <div class="pixel-grid-overlay"></div>
+    <div class="scanlines"></div>
+
+    <!-- Partículas em pixels no fundo -->
+    <div id="particles-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+    <div class="relative z-10 flex-grow flex flex-col items-center px-4 py-6 max-w-7xl mx-auto w-full">
+        
+        <!-- Header -->
+        <header class="w-full text-center mb-6">
+            <div class="flex items-center justify-center gap-3 mb-3 flex-wrap">
+                <span class="badge-pixel bg-purple-600 text-white text-[10px] sm:text-xs px-3 py-1 font-bold uppercase border-2 border-black tracking-wider">
+                    <i class="fa-solid fa-crown mr-1"></i> PAINEL DO ORIENTADOR
+                </span>
+                <span class="badge-pixel bg-cyan-500 text-black text-[10px] sm:text-xs px-3 py-1 font-extrabold uppercase border-2 border-black tracking-wider animate-pulse">
+                    <i class="fa-solid fa-signal mr-1"></i> MODO AO VIVO
+                </span>
+                <span class="badge-pixel bg-pink-600 text-white text-[10px] sm:text-xs px-3 py-1 font-bold uppercase border-2 border-black tracking-wider">
+                    ★ CIEE PLAY ★
+                </span>
+            </div>
+
+            <h1 class="text-2xl sm:text-4xl font-pixel-title text-cyan-300 title-glow mb-2 tracking-wide">
+                NUVEM DE IDEIAS
+            </h1>
+            <p class="font-pixel-body text-xl sm:text-2xl text-purple-200 tracking-wider">
+                VISUALIZAÇÃO DE RESPOSTAS EM TEMPO REAL
+            </p>
+        </header>
+
+        <!-- Barra de Filtros e Painel de Controle -->
+        <section class="w-full mb-6">
+            <div class="pixel-box p-4 sm:p-5 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+                
+                <!-- Filtro por Cidade e Turma -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
+                    <!-- Cidade -->
+                    <div>
+                        <label for="filtroCidade" class="block font-pixel-title text-[10px] sm:text-xs text-cyan-300 mb-2 uppercase">
+                            <i class="fa-solid fa-city text-pink-500 mr-1"></i> CIDADE:
+                        </label>
+                        <select id="filtroCidade" onchange="atualizarFiltrosETurmas()" class="pixel-input w-full p-2.5 text-white rounded-none cursor-pointer">
+                            <option value="TODAS">-- TODAS AS CIDADES --</option>
+                            <option value="Braço do Norte">Braço do Norte</option>
+                            <option value="Imbituba">Imbituba</option>
+                            <option value="Tubarão">Tubarão</option>
+                        </select>
+                    </div>
+
+                    <!-- Turma -->
+                    <div>
+                        <label for="filtroTurma" class="block font-pixel-title text-[10px] sm:text-xs text-cyan-300 mb-2 uppercase">
+                            <i class="fa-solid fa-users text-pink-500 mr-1"></i> TURMA:
+                        </label>
+                        <select id="filtroTurma" onchange="processarERenderizarNuvem()" class="pixel-input w-full p-2.5 text-white rounded-none cursor-pointer">
+                            <option value="TODAS">-- TODAS AS TURMAS --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Estatísticas e Botão de Reset -->
+                <div class="flex flex-col sm:flex-row items-center justify-between lg:justify-end gap-4 border-t-2 lg:border-t-0 lg:border-l-2 border-slate-700/80 pt-4 lg:pt-0 lg:pl-5">
+                    
+                    <!-- Contador Geral -->
+                    <div class="bg-slate-950 p-3 border-2 border-cyan-500 text-center min-w-[140px] w-full sm:w-auto">
+                        <span class="block font-pixel-title text-[9px] text-cyan-400 uppercase mb-1">RESPOSTAS</span>
+                        <span id="counterRespostas" class="font-pixel-body text-3xl font-bold text-yellow-300">0</span>
+                    </div>
+
+                    <!-- Botão Limpar Banco de Dados -->
+                    <button 
+                        type="button" 
+                        onclick="confirmarLimpeza()" 
+                        class="btn-arcade-red py-3 px-4 text-xs font-bold uppercase rounded-none tracking-wider flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
+                        title="Apagar dados da nuvem"
+                    >
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>LIMPAR</span>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Visualizador da Nuvem de Palavras -->
+        <main class="w-full flex-grow flex flex-col">
+            <div class="pixel-screen-glow bg-slate-950 p-3 sm:p-5 relative flex-grow flex flex-col justify-center items-center min-h-[500px]">
+                
+                <!-- Overlay de Carregamento / Status Vazio -->
+                <div id="cloudPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 z-10 p-6 text-center">
+                    <i class="fa-solid fa-cloud-arrow-up text-5xl sm:text-6xl text-cyan-400 mb-4 animate-bounce"></i>
+                    <p class="font-pixel-title text-sm sm:text-base text-yellow-300 uppercase mb-2">AGUARDANDO PALAVRAS...</p>
+                    <p class="font-pixel-body text-xl sm:text-2xl text-slate-400 max-w-md">
+                        Nenhuma resposta encontrada para o filtro selecionado. Mande sua ideia pelo formulário de alunos!
+                    </p>
+                </div>
+
+                <!-- Canvas onde a Nuvem será renderizada -->
+                <div id="wordcloud-container" class="w-full h-full relative flex items-center justify-center overflow-hidden min-h-[480px]">
+                    <canvas id="wordcloud-canvas"></canvas>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Confirmação de Reset -->
+    <div id="resetModal" class="fixed inset-0 z-50 bg-black/85 flex items-center justify-center px-4 hidden">
+        <div class="modal-pixel w-full max-w-lg p-6 text-center relative">
+            <div class="text-red-500 text-5xl mb-3 animate-pulse">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="font-pixel-title text-base sm:text-lg text-yellow-300 mb-3 uppercase leading-relaxed">
+                LIMPAR BANCO DE DADOS?
+            </h3>
+            <p class="font-pixel-body text-2xl text-cyan-200 mb-6 leading-relaxed">
+                Esta ação apagarará TODAS as palavras salvas no servidor Firebase! Tem certeza de que deseja zerar a Nuvem?
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button 
+                    onclick="executarLimpeza()" 
+                    class="btn-arcade-red w-full sm:w-auto px-6 py-3 text-xs font-bold uppercase rounded-none cursor-pointer"
+                >
+                    SIM, APAGAR TUDO ▶
+                </button>
+                <button 
+                    onclick="fecharModalReset()" 
+                    class="bg-slate-700 hover:bg-slate-600 text-white font-pixel-title px-6 py-3 text-xs uppercase border-2 border-black border-b-4 cursor-pointer w-full sm:w-auto"
+                >
+                    CANCELAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="relative z-10 py-4 text-center border-t-2 border-blue-900/40 bg-slate-950/80 backdrop-blur-md mt-auto">
+        <p class="font-pixel-title text-[10px] sm:text-xs text-blue-300">CIEE Santa Catarina - Painel do Orientador</p>
+    </footer>
+
+    <script>
+        // Configuração Exata do Firebase Realtime Database
+        const firebaseConfig = {
+          apiKey: "AIzaSyBPyd0QyTdfmXjWek1wy2rxSYw7xHiT_to",
+          authDomain: "ciee-tubarao.firebaseapp.com",
+          databaseURL: "https://ciee-tubarao-default-rtdb.firebaseio.com",
+          projectId: "ciee-tubarao",
+          storageBucket: "ciee-tubarao.firebasestorage.app",
+          messagingSenderId: "1031931207865",
+          appId: "1:1031931207865:web:8e40f01b03f82d8394fb68",
+          measurementId: "G-J8BR6R1P1N"
+        };
+
+        // Inicializar Firebase
+        let firebaseApp, database;
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            console.log("Firebase Database Conectado ao Painel!");
+        } catch (err) {
+            console.error("Erro ao inicializar Firebase:", err);
+        }
+
+        // Mapeamento Exato de Cidades e Turmas (Idêntico ao index.html)
+        const turmasPorCidade = {
+            "Braço do Norte": [
+                "Terça matutino",
+                "Terça vespertino"
+            ],
+            "Imbituba": [
+                "Segunda vespertino",
+                "Quarta matutino",
+                "Quarta vespertino",
+                "Quinta matutino",
+                "Quinta vespertino",
+                "Sexta matutino",
+                "Sexta vespertino"
+            ],
+            "Tubarão": [
+                "Segunda vesp (Sofia)",
+                "Segunda vesp (Fabrício)",
+                "Terça matutino",
+                "Terça vesp (Fabrício)",
+                "Terça vesp (João)",
+                "Quarta matutino",
+                "Quarta vespertino",
+                "Quinta matutino",
+                "Quinta vespertino",
+                "Sexta matutino",
+                "Sexta vespertino"
+            ]
+        };
+
+        // Armazenamento local das respostas carregadas
+        let todadasRespostas = [];
+
+        // Paletas de Cores Gamer para a Nuvem de Palavras
+        const retroColors = [
+            '#38b6ff', '#facc15', '#22c55e', '#ec4899', 
+            '#a855f7', '#f97316', '#06b6d4', '#e11d48'
+        ];
+
+        // Atualiza o Select de Turmas com base na Cidade Selecionada
+        function atualizarFiltrosETurmas() {
+            const cidadeSelect = document.getElementById('filtroCidade');
+            const turmaSelect = document.getElementById('filtroTurma');
+            const cidadeSelecionada = cidadeSelect.value;
+
+            // Limpa as opções atuais
+            turmaSelect.innerHTML = '';
+
+            // Opção padrão
+            const defaultOption = document.createElement('option');
+            defaultOption.value = 'TODAS';
+            defaultOption.textContent = '-- TODAS AS TURMAS --';
+            turmaSelect.appendChild(defaultOption);
+
+            if (cidadeSelecionada !== 'TODAS' && turmasPorCidade[cidadeSelecionada]) {
+                turmasPorCidade[cidadeSelecionada].forEach(turma => {
+                    const option = document.createElement('option');
+                    option.value = turma;
+                    option.textContent = turma;
+                    turmaSelect.appendChild(option);
+                });
+            }
+
+            processarERenderizarNuvem();
+        }
+
+        // Escutador Realtime no Nó 'respostas' do Firebase
+        function iniciarEscutaFirebase() {
+            if (!database) return;
+
+            const respostasRef = database.ref('respostas');
+            respostasRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                todadasRespostas = [];
+
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        todadasRespostas.push({
+                            id: key,
+                            ...data[key]
+                        });
+                    });
+                }
+
+                processarERenderizarNuvem();
+            }, (error) => {
+                console.error("Erro no realtime listener:", error);
+            });
+        }
+
+        // Processa as respostas filtradas e gera a Nuvem com WordCloud2
+        function processarERenderizarNuvem() {
+            const cidadeFiltro = document.getElementById('filtroCidade').value;
+            const turmaFiltro = document.getElementById('filtroTurma').value;
+            const placeholder = document.getElementById('cloudPlaceholder');
+
+            // Filtragem dos dados
+            const respostasFiltradas = todadasRespostas.filter(item => {
+                const matchCidade = (cidadeFiltro === 'TODAS' || item.cidade === cidadeFiltro);
+                const matchTurma = (turmaFiltro === 'TODAS' || item.turma === turmaFiltro);
+                return matchCidade && matchTurma;
+            });
+
+            // Atualiza contador numérico
+            document.getElementById('counterRespostas').textContent = respostasFiltradas.length;
+
+            if (respostasFiltradas.length === 0) {
+                placeholder.classList.remove('hidden');
+                limparCanvas();
+                return;
+            } else {
+                placeholder.classList.add('hidden');
+            }
+
+            // Contagem de Frequência das Palavras/Frases
+            const frequenciaMap = {};
+
+            respostasFiltradas.forEach(item => {
+                if (!item.palavra) return;
+                
+                // Trata a palavra/frase (caixa alta e normalização leve)
+                let termo = item.palavra.trim().toUpperCase();
+
+                if (termo) {
+                    frequenciaMap[termo] = (frequenciaMap[termo] || 0) + 1;
+                }
+            });
+
+            // Converter para Array no formato do WordCloud2: [['PALAVRA', PESO], ...]
+            const listData = Object.keys(frequenciaMap).map(key => {
+                return [key, frequenciaMap[key]];
+            });
+
+            renderizarWordCloud(listData);
+        }
+
+        // Renderiza a Nuvem usando WordCloud2
+        function renderizarWordCloud(wordsList) {
+            const canvas = document.getElementById('wordcloud-canvas');
+            const container = document.getElementById('wordcloud-container');
+
+            // Ajusta o tamanho do canvas para caber no container
+            canvas.width = container.clientWidth || 800;
+            canvas.height = container.clientHeight || 500;
+
+            // Fator de escala dinâmico baseado na quantidade max de repetições
+            let maxCount = 1;
+            wordsList.forEach(item => {
+                if (item[1] > maxCount) maxCount = item[1];
+            });
+
+            WordCloud(canvas, {
+                list: wordsList,
+                gridSize: Math.round(16 * canvas.width / 1024),
+                weightFactor: function (size) {
+                    // Cálculo dinâmico para garantir boa visibilidade
+                    const baseSize = Math.max(18, canvas.width / 30);
+                    return baseSize + (size * 12);
+                },
+                fontFamily: "'VT323', 'Press Start 2P', monospace",
+                color: function () {
+                    return retroColors[Math.floor(Math.random() * retroColors.length)];
+                },
+                backgroundColor: 'transparent',
+                rotateRatio: 0.25,
+                rotationSteps: 2,
+                drawOutOfBound: false,
+                shrinkToFit: true
+            });
+        }
+
+        function limparCanvas() {
+            const canvas = document.getElementById('wordcloud-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Ações de Limpeza do Banco de Dados
+        function confirmarLimpeza() {
+            play8BitSound('warn');
+            document.getElementById('resetModal').classList.remove('hidden');
+        }
+
+        function fecharModalReset() {
+            document.getElementById('resetModal').classList.add('hidden');
+        }
+
+        async function executarLimpeza() {
+            fecharModalReset();
+            try {
+                if (database) {
+                    await database.ref('respostas').remove();
+                    play8BitSound('clear');
+                    console.log("Banco de dados limpo com sucesso.");
+                }
+            } catch (err) {
+                console.error("Erro ao apagar banco:", err);
+            }
+        }
+
+        // Partículas em Pixels no Fundo
+        function gerarParticulasBackground() {
+            const container = document.getElementById('particles-container');
+            const numParticulas = 15;
+
+            for (let i = 0; i < numParticulas; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'pixel-particle';
+
+                const leftPos = Math.random() * 100;
+                const duration = 12 + Math.random() * 18;
+                const delay = Math.random() * -20;
+                const size = 4 + Math.floor(Math.random() * 8);
+
+                particle.style.left = `${leftPos}%`;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+
+                container.appendChild(particle);
+            }
+        }
+
+        // Sintetizador de Som 8-Bit
+        function play8BitSound(type) {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+
+                if (type === 'warn') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.15);
+                } else if (type === 'clear') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(600, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                }
+            } catch (e) {
+                // Audio desabilitado no navegador
+            }
+        }
+
+        // Eventos e Redimensionamento
+        window.addEventListener('DOMContentLoaded', () => {
+            gerarParticulasBackground();
+            atualizarFiltrosETurmas();
+            iniciarEscutaFirebase();
+        });
+
+        window.addEventListener('resize', () => {
+            processarERenderizarNuvem();
+        });
+    </script>
 </body>
 </html>
