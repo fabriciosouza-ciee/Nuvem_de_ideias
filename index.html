@@ -255,9 +255,9 @@
                         </label>
                         <select id="cidade" onchange="atualizarTurmas()" required class="pixel-input w-full p-3 text-white rounded-none cursor-pointer">
                             <option value="" disabled selected>-- SELECIONE A CIDADE --</option>
-                            <option value="Braço do Norte">Braço do Norte</option>
-                            <option value="Imbituba">Imbituba</option>
-                            <option value="Tubarão">Tubarão</option>
+                            <option value="Braço do Norte">BRAÇO DO NORTE</option>
+                            <option value="Imbituba">IMBITUBA</option>
+                            <option value="Tubarão">TUBARÃO</option>
                         </select>
                     </div>
 
@@ -267,7 +267,7 @@
                             <i class="fa-solid fa-users text-pink-500 mr-1"></i> 2. SUA TURMA:
                         </label>
                         <select id="turma" disabled required class="pixel-input w-full p-3 text-white rounded-none cursor-pointer opacity-50">
-                            <option value="" disabled selected>-- PRIMEIRA SELEICIONE A CIDADE --</option>
+                            <option value="" disabled selected>-- PRIMEIRO SELECIONE A CIDADE --</option>
                         </select>
                     </div>
 
@@ -282,7 +282,7 @@
                                 <input 
                                     type="text" 
                                     id="palavra" 
-                                    maxlength="30" 
+                                    maxlength="100" 
                                     required 
                                     placeholder="DIGITE AQUI..." 
                                     oninput="atualizarContador(this)"
@@ -292,8 +292,8 @@
                             
                             <!-- Contador de Caracteres -->
                             <div class="flex justify-between items-center mt-2 font-pixel-body text-lg text-yellow-200/80">
-                                <span>MÁXIMO: 30 CHARS</span>
-                                <span id="charCounter" class="font-bold text-yellow-400">0 / 30</span>
+                                <span>MÁXIMO: 100 CHARS</span>
+                                <span id="charCounter" class="font-bold text-yellow-400">0 / 100</span>
                             </div>
                         </div>
                     </div>
@@ -329,7 +329,7 @@
                 IDEIA REGISTRADA!
             </h3>
             <p class="font-pixel-body text-2xl text-cyan-200 mb-6 leading-relaxed">
-                Sua palavra foi enviada com sucesso para a Nuvem de Ideias!
+                Sua ideia foi enviada com sucesso para a Nuvem de Ideias!
             </p>
             <button 
                 onclick="fecharModal()" 
@@ -346,7 +346,7 @@
             
             <div class="text-left text-center sm:text-left">
                 <p class="font-pixel-title text-xs text-blue-300">CIEE Santa Catarina</p>
-                <p class="font-pixel-body text-lg text-slate-400 mt-1">Capacitando e conectando jovens ao futuro.</p>
+                <p class="font-pixel-body text-lg text-slate-400 mt-1">Conectando jovens ao futuro.</p>
             </div>
 
             <!-- Links Sociais Pixelados -->
@@ -411,7 +411,7 @@
                 "Segunda vesp (Fabrício)",
                 "Terça matutino",
                 "Terça vesp (Fabrício)",
-                "Terça vesp (João)",
+                "Terça vesp (João Gabriel)",
                 "Quarta matutino",
                 "Quarta vespertino",
                 "Quinta matutino",
