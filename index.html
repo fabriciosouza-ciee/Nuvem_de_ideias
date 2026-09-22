@@ -469,9 +469,9 @@
         function atualizarContador(input) {
             const counter = document.getElementById('charCounter');
             const count = input.value.length;
-            counter.textContent = `${count} / 30`;
+            counter.textContent = `${count} / 100`;
             
-            if (count >= 30) {
+            if (count >= 100) {
                 counter.classList.add('text-red-400');
             } else {
                 counter.classList.remove('text-red-400');
