@@ -4,26 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIEE PLAY - Painel do Orientador</title>
-  
-  <!-- Fontes Gamer do Google Fonts -->
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-  
-  <!-- Biblioteca WordCloud2.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
 
   <style>
     :root {
-      --bg-dark: #12002b;
       --bg-card: #200247;
+      --bg-deep: #080015;
       --accent-cyan: #00f0ff;
       --accent-yellow: #ffee00;
       --accent-green: #20e070;
       --accent-red: #ff3366;
       --text-light: #ffffff;
+      --text-dim: #b9a8d9;
     }
-
     * { box-sizing: border-box; }
 
     body {
@@ -31,6 +27,7 @@
       padding: 20px 10px;
       font-family: 'VT323', monospace;
       background: linear-gradient(135deg, #090014 0%, #1a0033 50%, #00102e 100%);
+      background-attachment: fixed;
       color: var(--text-light);
       min-height: 100vh;
       display: flex;
@@ -40,7 +37,7 @@
 
     .container {
       width: 100%;
-      max-width: 900px;
+      max-width: 1100px;
       background: var(--bg-card);
       border: 4px solid var(--accent-cyan);
       box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
@@ -52,20 +49,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
       border-bottom: 2px dashed var(--accent-cyan);
       padding-bottom: 15px;
       margin-bottom: 20px;
     }
-
-    .badge {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 10px;
-      background: var(--accent-yellow);
-      color: #000;
-      padding: 6px 10px;
-      border-radius: 4px;
-    }
-
     h1 {
       font-family: 'Press Start 2P', cursive;
       font-size: 16px;
@@ -74,115 +62,240 @@
       margin: 0;
       text-shadow: 2px 2px #000;
     }
+    .badge {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      background: var(--accent-yellow);
+      color: #000;
+      padding: 6px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
 
+    /* ---------- Filtros ---------- */
     .filters-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
       background: rgba(0,0,0,0.3);
       padding: 15px;
       border-radius: 6px;
       border: 1px solid rgba(255,255,255,0.1);
     }
-
-    .field-group {
-      display: flex;
-      flex-direction: column;
-    }
-
+    .field-group { display: flex; flex-direction: column; }
     label {
       font-family: 'Press Start 2P', cursive;
       font-size: 9px;
       color: var(--accent-yellow);
       margin-bottom: 6px;
     }
-
-    select {
+    select, .input-text, .input-pass {
       font-family: 'VT323', monospace;
-      font-size: 18px;
-      padding: 8px;
+      font-size: 19px;
+      padding: 7px 8px;
       background: #0d001e;
       color: #fff;
       border: 2px solid var(--accent-cyan);
       border-radius: 4px;
       outline: none;
+      width: 100%;
     }
+    .input-pass { border-color: var(--accent-red); transition: all .3s; }
+    .input-pass.unlocked { border-color: var(--accent-green); color: var(--accent-green); }
 
-    .input-pass {
-      font-family: 'VT323', monospace;
-      font-size: 18px;
-      padding: 8px;
-      background: #0d001e;
-      color: #fff;
-      border: 2px solid var(--accent-red);
-      border-radius: 4px;
-      outline: none;
-      transition: all 0.3s ease;
+    .admin-row {
+      display: flex;
+      gap: 14px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
     }
+    .admin-row .field-group { flex: 1 1 200px; }
 
-    .input-pass.unlocked {
-      border-color: var(--accent-green);
-      color: var(--accent-green);
-    }
-
-    .btn-reset {
+    .btn {
       font-family: 'Press Start 2P', cursive;
       font-size: 10px;
-      background: var(--accent-red);
-      color: white;
       border: none;
-      padding: 12px;
+      padding: 12px 14px;
       cursor: pointer;
       border-radius: 4px;
-      box-shadow: 0 4px #880022;
-      transition: all 0.1s;
-      align-self: flex-end;
-      height: 42px;
+      transition: transform .1s, box-shadow .1s;
+      white-space: nowrap;
     }
+    .btn-reset { background: var(--accent-red); color: #fff; box-shadow: 0 4px #880022; }
+    .btn-reset:disabled { background: #444; color: #888; box-shadow: 0 4px #222; cursor: not-allowed; }
+    .btn-reset:not(:disabled):active { transform: translateY(3px); box-shadow: 0 1px #880022; }
+    .btn-present { background: var(--accent-cyan); color: #000; box-shadow: 0 4px #007a85; }
+    .btn-present:active { transform: translateY(3px); box-shadow: 0 1px #007a85; }
+    .btn-present:disabled { background: #444; color: #888; box-shadow: 0 4px #222; cursor: not-allowed; }
 
-    .btn-reset:disabled {
-      background: #444444;
-      color: #888888;
-      box-shadow: 0 4px #222222;
-      cursor: not-allowed;
-    }
-
-    .btn-reset:not(:disabled):active {
-      transform: translateY(3px);
-      box-shadow: 0 1px #880022;
-    }
-
+    /* ---------- Estatísticas ---------- */
     .stats {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 11px;
-      color: var(--accent-green);
-      text-align: center;
-      margin-bottom: 15px;
-    }
-
-    .cloud-box {
-      width: 100%;
-      height: 450px;
-      background: #080015;
-      border: 3px solid var(--accent-cyan);
-      border-radius: 6px;
-      position: relative;
       display: flex;
       justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px 24px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      color: var(--accent-green);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+    .stats span b { color: var(--accent-yellow); font-weight: normal; }
+
+    /* ---------- Lista de perguntas ---------- */
+    .board {
+      background: var(--bg-deep);
+      border: 3px solid var(--accent-cyan);
+      border-radius: 6px;
+      padding: 16px;
+      min-height: 300px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+      align-items: start;
+    }
+    .card {
+      position: relative;
+      background: #15022f;
+      border: 2px solid #3c1a72;
+      border-left: 6px solid var(--accent-cyan);
+      border-radius: 6px;
+      padding: 12px 14px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      cursor: pointer;
+      transition: transform .12s, border-color .12s, opacity .2s;
+    }
+    .card:hover { transform: translateY(-2px); border-color: var(--accent-cyan); }
+    .card:nth-child(4n+2) { border-left-color: var(--accent-yellow); }
+    .card:nth-child(4n+3) { border-left-color: var(--accent-red); }
+    .card:nth-child(4n+4) { border-left-color: var(--accent-green); }
+    .card.done { opacity: .45; }
+    .card.done .card-text { text-decoration: line-through; text-decoration-color: rgba(255,255,255,.4); }
+
+    .card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .card-num {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+    .card-count {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 9px;
+      background: var(--accent-yellow);
+      color: #000;
+      padding: 4px 6px;
+      border-radius: 3px;
+    }
+    .card-text {
+      font-size: 24px;
+      line-height: 1.15;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      overflow: hidden;
+      gap: 8px;
+      font-size: 16px;
+      color: var(--text-dim);
+      border-top: 1px dashed rgba(255,255,255,.12);
+      padding-top: 6px;
+    }
+    .card-actions { display: flex; gap: 6px; }
+    .icon-btn {
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 3px;
+      padding: 1px 7px;
+      cursor: pointer;
+    }
+    .icon-btn:hover { color: #fff; border-color: #fff; }
+    .icon-btn.del { color: var(--accent-red); border-color: rgba(255,51,102,.5); display: none; }
+    body.unlocked .icon-btn.del { display: inline-block; }
+
+    .empty {
+      text-align: center;
+      padding: 70px 10px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 11px;
+      line-height: 2;
+      color: var(--text-dim);
     }
 
-    canvas {
-      width: 100% !important;
-      height: 100% !important;
+    /* ---------- Modo apresentação ---------- */
+    .presenter {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(5, 0, 15, .97);
+      display: none;
+      flex-direction: column;
+      padding: 20px;
     }
+    .presenter.open { display: flex; }
+    .presenter-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 11px;
+      color: var(--accent-cyan);
+      gap: 10px;
+    }
+    .presenter-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px 60px;
+      gap: 24px;
+    }
+    .presenter-text {
+      font-size: clamp(32px, 5.5vw, 76px);
+      line-height: 1.1;
+      max-width: 1200px;
+      word-break: break-word;
+      color: #fff;
+      text-shadow: 3px 3px #000;
+    }
+    .presenter-meta { font-size: 24px; color: var(--accent-yellow); }
+    .presenter-nav {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .presenter .btn-ghost {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      background: transparent;
+      color: #fff;
+      border: 2px solid var(--accent-cyan);
+      border-radius: 4px;
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    .presenter .btn-ghost:hover { background: rgba(0,240,255,.15); }
+    .presenter .btn-ghost.ok { border-color: var(--accent-green); color: var(--accent-green); }
+    .hint { text-align: center; font-size: 16px; color: var(--text-dim); margin-top: 10px; }
 
     @media (max-width: 600px) {
       h1 { font-size: 12px; }
-      .cloud-box { height: 350px; }
-      .btn-reset { align-self: stretch; margin-top: 10px; }
+      .presenter-body { padding: 10px; }
+      .admin-row .btn { flex: 1 1 100%; }
     }
   </style>
 </head>
@@ -190,11 +303,11 @@
 
   <div class="container">
     <div class="header-bar">
-      <h1>Nuvem de Ideias</h1>
+      <h1>Mural de Perguntas</h1>
       <span class="badge">CIEE PLAY</span>
     </div>
 
-    <!-- Filtros por Cidade e Turma -->
+    <!-- Filtros -->
     <div class="filters-grid">
       <div class="field-group">
         <label for="filtroCidade">CIDADE:</label>
@@ -205,36 +318,79 @@
           <option value="Tubarão">Tubarão</option>
         </select>
       </div>
-
       <div class="field-group">
         <label for="filtroTurma">TURMA:</label>
         <select id="filtroTurma">
           <option value="TODAS">-- TODAS AS TURMAS --</option>
         </select>
       </div>
+      <div class="field-group">
+        <label for="filtroPeriodo">PERÍODO:</label>
+        <select id="filtroPeriodo">
+          <option value="tudo">Todas as datas</option>
+          <option value="hoje">Somente hoje</option>
+          <option value="7d">Últimos 7 dias</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label for="ordenar">ORDENAR:</label>
+        <select id="ordenar">
+          <option value="recentes">Mais recentes</option>
+          <option value="antigas">Mais antigas</option>
+          <option value="repetidas">Mais repetidas</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label for="busca">BUSCAR:</label>
+        <input type="text" id="busca" class="input-text" placeholder="Palavra..." autocomplete="off">
+      </div>
+    </div>
 
+    <div class="admin-row">
+      <button id="btnApresentar" class="btn btn-present">▶ APRESENTAR</button>
       <div class="field-group">
         <label for="senhaReset">DESBLOQUEAR:</label>
         <input type="password" id="senhaReset" class="input-pass" placeholder="Palavra-passe..." autocomplete="off">
       </div>
-
-      <button id="btnLimpar" class="btn-reset" disabled>🔒 LIMPAR TUDO</button>
+      <button id="btnLimparTurma" class="btn btn-reset" disabled>🔒 LIMPAR TURMA</button>
+      <button id="btnLimpar" class="btn btn-reset" disabled>🔒 LIMPAR TUDO</button>
     </div>
 
-    <div class="stats" id="contadorRespostas">RESPOSTAS RECEBIDAS: 0</div>
-
-    <!-- Tela da Nuvem -->
-    <div class="cloud-box">
-      <canvas id="canvasNuvem"></canvas>
+    <div class="stats">
+      <span>RESPOSTAS: <b id="statTotal">0</b></span>
+      <span>DIFERENTES: <b id="statUnicas">0</b></span>
+      <span>DISCUTIDAS: <b id="statLidas">0</b></span>
     </div>
+
+    <div class="board">
+      <div class="grid" id="lista"></div>
+      <div class="empty" id="vazio">CARREGANDO...</div>
+    </div>
+    <p class="hint">Clique numa pergunta para projetá-la em tela cheia. Respostas iguais são agrupadas (×N).</p>
   </div>
 
-  <!-- Firebase SDK -->
+  <!-- Modo apresentação -->
+  <div class="presenter" id="presenter" aria-modal="true" role="dialog">
+    <div class="presenter-top">
+      <span id="presPos">1 / 1</span>
+      <button class="btn-ghost" id="presFechar" title="Fechar (Esc)">✕ FECHAR</button>
+    </div>
+    <div class="presenter-body">
+      <div class="presenter-text" id="presTexto"></div>
+      <div class="presenter-meta" id="presMeta"></div>
+    </div>
+    <div class="presenter-nav">
+      <button class="btn-ghost" id="presAnt">◀ ANTERIOR</button>
+      <button class="btn-ghost ok" id="presMarcar">✔ DISCUTIDA</button>
+      <button class="btn-ghost" id="presProx">PRÓXIMA ▶</button>
+    </div>
+    <p class="hint">Setas ← → para navegar · Espaço marca como discutida · Esc fecha</p>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBPyd0QyTdfmXjWek1wy2rxSYw7xHiT_to",
       authDomain: "ciee-tubarao.firebaseapp.com",
@@ -249,7 +405,9 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Mapeamento de Turmas por Cidade (idêntico ao index.html)
+    // Precisa ser IDÊNTICO ao index.html. (Antes estava "Terça vesp (João)" aqui
+    // e "Terça vesp (João Gabriel)" no index — o filtro nunca encontrava as respostas.)
+    // Mesmo assim, turmas que aparecerem nos dados e não estiverem aqui são adicionadas automaticamente.
     const turmasPorCidade = {
       "Braço do Norte": ["Terça matutino", "Terça vespertino"],
       "Imbituba": [
@@ -258,118 +416,341 @@
       ],
       "Tubarão": [
         "Segunda vesp (Sofia)", "Segunda vesp (Fabrício)", "Terça matutino",
-        "Terça vesp (Fabrício)", "Terça vesp (João)", "Quarta matutino",
+        "Terça vesp (Fabrício)", "Terça vesp (João Gabriel)", "Quarta matutino",
         "Quarta vespertino", "Quinta matutino", "Quinta vespertino",
         "Sexta matutino", "Sexta vespertino"
       ]
     };
 
-    const selectCidade = document.getElementById('filtroCidade');
-    const selectTurma = document.getElementById('filtroTurma');
-    const contador = document.getElementById('contadorRespostas');
-    const btnLimpar = document.getElementById('btnLimpar');
-    const senhaReset = document.getElementById('senhaReset');
+    const $ = id => document.getElementById(id);
+    const selectCidade = $('filtroCidade');
+    const selectTurma = $('filtroTurma');
+    const selectPeriodo = $('filtroPeriodo');
+    const selectOrdem = $('ordenar');
+    const inputBusca = $('busca');
+    const btnLimpar = $('btnLimpar');
+    const senhaReset = $('senhaReset');
+    const lista = $('lista');
+    const vazio = $('vazio');
 
     let dadosTotais = {};
+    let gruposVisiveis = [];
+    let carregado = false;
+    let desbloqueado = false;
 
-    // Trava de segurança para o botão Limpar
+    // ---------- "Discutidas" (fica salvo só neste navegador) ----------
+    const LS_KEY = 'cieeplay_discutidas';
+    let discutidas = new Set();
+    try { discutidas = new Set(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); } catch (e) {}
+    function salvarDiscutidas() {
+      try { localStorage.setItem(LS_KEY, JSON.stringify([...discutidas])); } catch (e) {}
+    }
+
+    // ---------- Utilidades ----------
+    const semAcento = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+    function chaveTexto(s) {
+      const k = semAcento(s).toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+      return k || s.trim().toLowerCase();
+    }
+    function limparTexto(s) {
+      return s.replace(/\s+/g, ' ').trim();
+    }
+    function formatarHora(ts) {
+      if (!ts) return '';
+      const d = new Date(ts);
+      const hoje = new Date();
+      const hh = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      if (d.toDateString() === hoje.toDateString()) return hh;
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' + hh;
+    }
+    function dentroDoPeriodo(ts, periodo) {
+      if (periodo === 'tudo') return true;
+      if (!ts) return false;
+      const d = new Date(ts);
+      if (periodo === 'hoje') return d.toDateString() === new Date().toDateString();
+      if (periodo === '7d') return Date.now() - ts <= 7 * 24 * 60 * 60 * 1000;
+      return true;
+    }
+
+    // ---------- Senha ----------
     senhaReset.addEventListener('input', () => {
-      const valor = senhaReset.value.trim().toLowerCase();
-      if (valor === 'malfeitofeito') {
-        btnLimpar.disabled = false;
-        btnLimpar.innerText = "🔓 LIMPAR TUDO";
-        senhaReset.classList.add('unlocked');
-      } else {
-        btnLimpar.disabled = true;
-        btnLimpar.innerText = "🔒 LIMPAR TUDO";
-        senhaReset.classList.remove('unlocked');
-      }
+      desbloqueado = senhaReset.value.trim().toLowerCase() === 'malfeitofeito';
+      senhaReset.classList.toggle('unlocked', desbloqueado);
+      document.body.classList.toggle('unlocked', desbloqueado);
+      atualizarBotaoLimpar();
     });
 
-    // Atualiza o select de turmas de acordo com a cidade
+    // Botão 1: limpa a turma selecionada (ou a cidade inteira, se a turma estiver em "TODAS").
+    // Botão 2: limpa o banco inteiro. Período e busca NÃO influenciam a limpeza.
+    const btnLimparTurma = $('btnLimparTurma');
+    function atualizarBotaoLimpar() {
+      const cadeado = desbloqueado ? '🔓 ' : '🔒 ';
+      const cidade = selectCidade.value;
+      const turma = selectTurma.value;
+      let rotulo = 'LIMPAR TURMA';
+      if (cidade !== 'TODAS' && turma === 'TODAS') rotulo = 'LIMPAR CIDADE';
+      btnLimparTurma.textContent = cadeado + rotulo;
+      btnLimparTurma.disabled = !desbloqueado || cidade === 'TODAS';
+      btnLimparTurma.title = cidade === 'TODAS' ? 'Selecione uma cidade/turma primeiro' : '';
+      btnLimpar.textContent = cadeado + 'LIMPAR TUDO';
+      btnLimpar.disabled = !desbloqueado;
+    }
+
+    function idsDe(cidade, turma) {
+      return Object.entries(dadosTotais)
+        .filter(([, it]) => it && it.cidade === cidade && (turma === 'TODAS' || it.turma === turma))
+        .map(([id]) => id);
+    }
+
+    // ---------- Turmas (config + o que existir nos dados) ----------
     function atualizarSelectTurmas() {
       const cidade = selectCidade.value;
+      const atual = selectTurma.value;
+      const turmas = new Set(turmasPorCidade[cidade] || []);
+      if (cidade !== 'TODAS') {
+        Object.values(dadosTotais).forEach(it => {
+          if (it && it.cidade === cidade && it.turma) turmas.add(it.turma);
+        });
+      }
       selectTurma.innerHTML = '<option value="TODAS">-- TODAS AS TURMAS --</option>';
-
-      if (cidade !== 'TODAS' && turmasPorCidade[cidade]) {
-        turmasPorCidade[cidade].forEach(t => {
+      if (cidade !== 'TODAS') {
+        turmas.forEach(t => {
           const opt = document.createElement('option');
           opt.value = t;
           opt.textContent = t;
           selectTurma.appendChild(opt);
         });
       }
-      desenharNuvem();
+      selectTurma.value = turmas.has(atual) ? atual : 'TODAS';
     }
 
-    // Função para desenhar a nuvem
-    function desenharNuvem() {
+    // ---------- Montagem da lista ----------
+    function renderizar() {
       const cidadeSel = selectCidade.value;
       const turmaSel = selectTurma.value;
-      const frequenciaPalavras = {};
-      let totalFiltrado = 0;
+      const periodo = selectPeriodo.value;
+      const busca = chaveTexto(inputBusca.value || '');
+      const grupos = new Map();
+      let total = 0;
 
-      Object.values(dadosTotais).forEach(item => {
-        const atendeCidade = (cidadeSel === 'TODAS' || item.cidade === cidadeSel);
-        const atendeTurma = (turmaSel === 'TODAS' || item.turma === turmaSel);
+      Object.entries(dadosTotais).forEach(([id, item]) => {
+        if (!item || item.palavra == null) return;
+        const texto = limparTexto(String(item.palavra));
+        if (!texto) return;
+        if (cidadeSel !== 'TODAS' && item.cidade !== cidadeSel) return;
+        if (turmaSel !== 'TODAS' && item.turma !== turmaSel) return;
+        const ts = typeof item.timestamp === 'number' ? item.timestamp : 0;
+        if (!dentroDoPeriodo(ts, periodo)) return;
+        const chave = chaveTexto(texto);
+        if (busca && !chave.includes(busca)) return;
 
-        if (atendeCidade && atendeTurma && item.palavra) {
-          const p = item.palavra.trim().toUpperCase();
-          frequenciaPalavras[p] = (frequenciaPalavras[p] || 0) + 1;
-          totalFiltrado++;
+        total++;
+        if (!grupos.has(chave)) {
+          grupos.set(chave, { chave, texto, ids: [], count: 0, primeiro: ts || Infinity, ultimo: ts, turmas: new Set() });
         }
+        const g = grupos.get(chave);
+        g.ids.push(id);
+        g.count++;
+        if (ts && ts < g.primeiro) g.primeiro = ts;
+        if (ts > g.ultimo) g.ultimo = ts;
+        if (item.turma) g.turmas.add((cidadeSel === 'TODAS' && item.cidade ? item.cidade + ' · ' : '') + item.turma);
       });
 
-      contador.innerText = `RESPOSTAS RECEBIDAS: ${totalFiltrado}`;
-
-      const listaNuvem = Object.keys(frequenciaPalavras).map(p => {
-        return [p, frequenciaPalavras[p] * 15 + 12];
+      let arr = [...grupos.values()];
+      const ordem = selectOrdem.value;
+      arr.sort((a, b) => {
+        if (ordem === 'repetidas' && b.count !== a.count) return b.count - a.count;
+        if (ordem === 'antigas') return a.primeiro - b.primeiro;
+        return b.ultimo - a.ultimo;
       });
+      // Discutidas vão para o fim
+      arr = [...arr.filter(g => !discutidas.has(g.chave)), ...arr.filter(g => discutidas.has(g.chave))];
+      gruposVisiveis = arr;
 
-      const canvas = document.getElementById('canvasNuvem');
+      $('statTotal').textContent = total;
+      $('statUnicas').textContent = arr.length;
+      $('statLidas').textContent = arr.filter(g => discutidas.has(g.chave)).length;
+      $('btnApresentar').disabled = arr.length === 0;
 
-      // Ajusta o tamanho interno do canvas ao container
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
+      lista.innerHTML = '';
+      if (!carregado) { vazio.textContent = 'CARREGANDO...'; vazio.style.display = 'block'; return; }
+      if (arr.length === 0) {
+        vazio.textContent = busca ? 'NENHUMA RESPOSTA COM ESSE TERMO.' : 'NENHUMA RESPOSTA AINDA PARA ESTE FILTRO.';
+        vazio.style.display = 'block';
+        return;
+      }
+      vazio.style.display = 'none';
 
-      WordCloud(canvas, {
-        list: listaNuvem,
-        gridSize: 10,
-        weightFactor: 1,
-        fontFamily: "'Press Start 2P', cursive",
-        color: function() {
-          const cores = ['#00f0ff', '#ffee00', '#20e070', '#ff3366', '#ffffff'];
-          return cores[Math.floor(Math.random() * cores.length)];
-        },
-        backgroundColor: '#080015',
-        rotateRatio: 0.2
+      const mostrarTurma = turmaSel === 'TODAS';
+      const frag = document.createDocumentFragment();
+      arr.forEach((g, i) => {
+        const card = document.createElement('div');
+        card.className = 'card' + (discutidas.has(g.chave) ? ' done' : '');
+
+        const top = document.createElement('div');
+        top.className = 'card-top';
+        const num = document.createElement('span');
+        num.className = 'card-num';
+        num.textContent = '#' + (i + 1);
+        top.appendChild(num);
+        if (g.count > 1) {
+          const c = document.createElement('span');
+          c.className = 'card-count';
+          c.textContent = '×' + g.count;
+          c.title = g.count + ' pessoas enviaram isso';
+          top.appendChild(c);
+        }
+
+        const txt = document.createElement('div');
+        txt.className = 'card-text';
+        txt.textContent = g.texto; // textContent: evita injeção de HTML
+
+        const meta = document.createElement('div');
+        meta.className = 'card-meta';
+        const info = document.createElement('span');
+        const partes = [];
+        if (mostrarTurma && g.turmas.size) partes.push([...g.turmas].join(', '));
+        if (g.ultimo) partes.push(formatarHora(g.ultimo));
+        info.textContent = partes.join(' · ');
+
+        const actions = document.createElement('span');
+        actions.className = 'card-actions';
+        const bOk = document.createElement('button');
+        bOk.className = 'icon-btn';
+        bOk.textContent = discutidas.has(g.chave) ? '↺' : '✔';
+        bOk.title = discutidas.has(g.chave) ? 'Desmarcar' : 'Marcar como discutida';
+        bOk.addEventListener('click', e => { e.stopPropagation(); alternarDiscutida(g.chave); });
+        const bDel = document.createElement('button');
+        bDel.className = 'icon-btn del';
+        bDel.textContent = '🗑';
+        bDel.title = 'Apagar esta resposta';
+        bDel.addEventListener('click', e => { e.stopPropagation(); apagarIds(g.ids, `Apagar "${g.texto}"${g.count > 1 ? ` (${g.count} envios)` : ''}?`); });
+        actions.append(bOk, bDel);
+
+        meta.append(info, actions);
+        card.append(top, txt, meta);
+        card.addEventListener('click', () => abrirApresentacao(i));
+        frag.appendChild(card);
       });
+      lista.appendChild(frag);
     }
 
-    // Escuta mudanças nos filtros
-    selectCidade.addEventListener('change', atualizarSelectTurmas);
-    selectTurma.addEventListener('change', desenharNuvem);
+    function alternarDiscutida(chave) {
+      if (discutidas.has(chave)) discutidas.delete(chave); else discutidas.add(chave);
+      salvarDiscutidas();
+      renderizar();
+    }
 
-    // Escuta atualizações do Firebase
-    onValue(ref(db, 'respostas'), (snapshot) => {
-      dadosTotais = snapshot.val() || {};
-      desenharNuvem();
+    // ---------- Apagar ----------
+    function apagarIds(ids, mensagem) {
+      if (!desbloqueado || ids.length === 0) return;
+      if (!confirm(mensagem)) return;
+      const updates = {};
+      ids.forEach(id => { updates[id] = null; });
+      update(ref(db, 'respostas'), updates)
+        .catch(err => alert('Erro ao apagar: ' + err.message));
+    }
+
+    btnLimparTurma.addEventListener('click', () => {
+      const cidade = selectCidade.value;
+      const turma = selectTurma.value;
+      if (cidade === 'TODAS') return;
+      const ids = idsDe(cidade, turma);
+      if (ids.length === 0) { alert('Não há respostas para apagar nesta seleção.'); return; }
+      const alvo = turma === 'TODAS' ? `de TODAS as turmas de ${cidade}` : `da turma "${turma}" (${cidade})`;
+      apagarIds(ids, `ATENÇÃO: apagar permanentemente as ${ids.length} respostas ${alvo}?\n(Todas as datas — o filtro de período não se aplica.)`);
     });
 
-    // Botão Limpar Tudo
     btnLimpar.addEventListener('click', () => {
-      if (btnLimpar.disabled) return;
-      if (confirm("ATENÇÃO: Deseja apagar permanentemente todas as respostas registradas no sistema?")) {
-        remove(ref(db, 'respostas')).then(() => {
-          alert("Registros apagados com sucesso!");
-          senhaReset.value = '';
-          senhaReset.dispatchEvent(new Event('input'));
-        }).catch(err => alert("Erro ao apagar: " + err.message));
-      }
+      const ids = Object.keys(dadosTotais);
+      if (ids.length === 0) { alert('Não há respostas para apagar.'); return; }
+      apagarIds(ids, `ATENÇÃO: apagar permanentemente TODAS as ${ids.length} respostas do sistema (todas as cidades e turmas)?`);
     });
 
-    // Redimensiona a nuvem quando a tela muda de tamanho
-    window.addEventListener('resize', desenharNuvem);
+    // ---------- Modo apresentação ----------
+    const presenter = $('presenter');
+    let presIdx = 0;
+    let presChave = null;
+
+    function abrirApresentacao(i = 0) {
+      if (!gruposVisiveis.length) return;
+      presIdx = Math.max(0, Math.min(i, gruposVisiveis.length - 1));
+      presenter.classList.add('open');
+      mostrarSlide();
+      if (presenter.requestFullscreen) presenter.requestFullscreen().catch(() => {});
+    }
+    function fecharApresentacao() {
+      presenter.classList.remove('open');
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    }
+    function mostrarSlide() {
+      const g = gruposVisiveis[presIdx];
+      if (!g) { fecharApresentacao(); return; }
+      presChave = g.chave;
+      $('presPos').textContent = `${presIdx + 1} / ${gruposVisiveis.length}`;
+      $('presTexto').textContent = g.texto;
+      $('presMeta').textContent = g.count > 1 ? `${g.count} pessoas perguntaram isso` : '';
+      const feita = discutidas.has(g.chave);
+      $('presMarcar').textContent = feita ? '↺ DESMARCAR' : '✔ DISCUTIDA';
+    }
+    function navegar(d) {
+      presIdx = (presIdx + d + gruposVisiveis.length) % gruposVisiveis.length;
+      mostrarSlide();
+    }
+    $('btnApresentar').addEventListener('click', () => abrirApresentacao(0));
+    $('presFechar').addEventListener('click', fecharApresentacao);
+    $('presAnt').addEventListener('click', () => navegar(-1));
+    $('presProx').addEventListener('click', () => navegar(1));
+    $('presMarcar').addEventListener('click', marcarSlide);
+
+    function marcarSlide() {
+      const chave = presChave;
+      const marcando = !discutidas.has(chave);
+      alternarDiscutida(chave); // reordena a lista
+      // continua na próxima pergunta não discutida
+      let idx = gruposVisiveis.findIndex(g => g.chave === chave);
+      if (marcando) {
+        const prox = gruposVisiveis.findIndex(g => !discutidas.has(g.chave));
+        idx = prox >= 0 ? prox : idx;
+      }
+      presIdx = Math.max(0, idx);
+      mostrarSlide();
+    }
+
+    document.addEventListener('keydown', e => {
+      if (!presenter.classList.contains('open')) return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); navegar(1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); navegar(-1); }
+      else if (e.key === ' ') { e.preventDefault(); marcarSlide(); }
+      else if (e.key === 'Escape') fecharApresentacao();
+    });
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) presenter.classList.remove('open');
+    });
+
+    // ---------- Eventos dos filtros ----------
+    selectCidade.addEventListener('change', () => { atualizarSelectTurmas(); atualizarBotaoLimpar(); renderizar(); });
+    [selectTurma, selectPeriodo, selectOrdem].forEach(el =>
+      el.addEventListener('change', () => { atualizarBotaoLimpar(); renderizar(); }));
+    inputBusca.addEventListener('input', () => { atualizarBotaoLimpar(); renderizar(); });
+
+    // ---------- Firebase em tempo real ----------
+    onValue(ref(db, 'respostas'), snapshot => {
+      dadosTotais = snapshot.val() || {};
+      carregado = true;
+      atualizarSelectTurmas();
+      renderizar();
+      if (presenter.classList.contains('open')) {
+        const i = gruposVisiveis.findIndex(g => g.chave === presChave);
+        presIdx = i >= 0 ? i : Math.min(presIdx, gruposVisiveis.length - 1);
+        mostrarSlide();
+      }
+    }, err => {
+      vazio.textContent = 'ERRO AO CONECTAR: ' + err.message;
+      vazio.style.display = 'block';
+    });
+
+    atualizarBotaoLimpar();
   </script>
 </body>
 </html>
