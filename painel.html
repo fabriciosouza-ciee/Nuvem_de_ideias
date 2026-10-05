@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CIEE PLAY - Painel do Orientador</title>
+  <title>Questionador - Painel do Orientador</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,8 +26,10 @@
       margin: 0;
       padding: 20px 10px;
       font-family: 'VT323', monospace;
-      background: linear-gradient(135deg, #090014 0%, #1a0033 50%, #00102e 100%);
+      background: linear-gradient(135deg, #070d1e 0%, #0f172a 40%, #1e3a8a 80%, #1d4ed8 100%);
       background-attachment: fixed;
+      position: relative;
+      overflow-x: hidden;
       color: var(--text-light);
       min-height: 100vh;
       display: flex;
@@ -35,10 +37,39 @@
       align-items: center;
     }
 
+    /* ---------- Fundo igual ao index.html ---------- */
+    .pixel-grid-overlay {
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 8px 8px;
+      pointer-events: none; z-index: 1;
+    }
+    .scanlines {
+      position: fixed; inset: 0;
+      background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%);
+      background-size: 100% 4px;
+      pointer-events: none; z-index: 2; opacity: 0.6;
+    }
+    #cloud-container { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .pixel-cloud {
+      position: absolute; opacity: 0.25; pointer-events: none;
+      animation: floatCloud linear infinite;
+    }
+    @keyframes floatCloud {
+      from { transform: translateX(-150px); }
+      to { transform: translateX(calc(100vw + 150px)); }
+    }
+    .hint-top { margin: -6px 0 16px; }
+
     .container {
+      position: relative;
+      z-index: 10;
       width: 100%;
       max-width: 1100px;
-      background: var(--bg-card);
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(4px);
       border: 4px solid var(--accent-cyan);
       box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
       padding: 20px;
@@ -238,12 +269,13 @@
       position: fixed;
       inset: 0;
       z-index: 50;
-      background: rgba(5, 0, 15, .97);
+      background: transparent;
       display: none;
       flex-direction: column;
       padding: 20px;
     }
     .presenter.open { display: flex; }
+    body.presenting .container { visibility: hidden; }
     .presenter-top {
       display: flex;
       justify-content: space-between;
@@ -300,11 +332,14 @@
   </style>
 </head>
 <body>
+  <div class="pixel-grid-overlay"></div>
+  <div class="scanlines"></div>
+  <div id="cloud-container"></div>
 
   <div class="container">
     <div class="header-bar">
       <h1>Mural de Perguntas</h1>
-      <span class="badge">CIEE PLAY</span>
+      <span class="badge">Questionador</span>
     </div>
 
     <!-- Filtros -->
@@ -361,12 +396,12 @@
       <span>DIFERENTES: <b id="statUnicas">0</b></span>
       <span>DISCUTIDAS: <b id="statLidas">0</b></span>
     </div>
+    <p class="hint hint-top">Clique numa pergunta para projetá-la em tela cheia. Respostas iguais são agrupadas (×N).</p>
 
     <div class="board">
       <div class="grid" id="lista"></div>
       <div class="empty" id="vazio">CARREGANDO...</div>
     </div>
-    <p class="hint">Clique numa pergunta para projetá-la em tela cheia. Respostas iguais são agrupadas (×N).</p>
   </div>
 
   <!-- Modo apresentação -->
@@ -676,11 +711,14 @@
       if (!gruposVisiveis.length) return;
       presIdx = Math.max(0, Math.min(i, gruposVisiveis.length - 1));
       presenter.classList.add('open');
+      document.body.classList.add('presenting');
       mostrarSlide();
-      if (presenter.requestFullscreen) presenter.requestFullscreen().catch(() => {});
+      const raiz = document.documentElement;
+      if (raiz.requestFullscreen) raiz.requestFullscreen().catch(() => {});
     }
     function fecharApresentacao() {
       presenter.classList.remove('open');
+      document.body.classList.remove('presenting');
       if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     }
     function mostrarSlide() {
@@ -725,7 +763,7 @@
       else if (e.key === 'Escape') fecharApresentacao();
     });
     document.addEventListener('fullscreenchange', () => {
-      if (!document.fullscreenElement) presenter.classList.remove('open');
+      if (!document.fullscreenElement) { presenter.classList.remove('open'); document.body.classList.remove('presenting'); }
     });
 
     // ---------- Eventos dos filtros ----------
@@ -751,6 +789,24 @@
     });
 
     atualizarBotaoLimpar();
+
+    // Nuvens pixeladas no fundo (mesmas do index.html)
+    (function gerarNuvensBackground() {
+      const container = $('cloud-container');
+      for (let i = 0; i < 5; i++) {
+        const cloud = document.createElement('div');
+        cloud.className = 'pixel-cloud';
+        cloud.innerHTML = `<svg width="120" height="60" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="20" y="20" width="80" height="30" fill="#38b6ff"/>
+            <rect x="30" y="10" width="60" height="40" fill="#38b6ff"/>
+            <rect x="40" y="0" width="40" height="50" fill="#38b6ff"/>
+            <rect x="10" y="30" width="100" height="15" fill="#38b6ff"/></svg>`;
+        cloud.style.top = `${Math.random() * 80}%`;
+        cloud.style.animationDuration = `${25 + Math.random() * 35}s`;
+        cloud.style.animationDelay = `${Math.random() * -30}s`;
+        container.appendChild(cloud);
+      }
+    })();
   </script>
 </body>
 </html>
